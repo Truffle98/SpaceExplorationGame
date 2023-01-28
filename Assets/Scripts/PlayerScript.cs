@@ -14,16 +14,24 @@ public class PlayerScript : MonoBehaviour
 
     void FixedUpdate()
     {
-        FaceCursor();
+        TurnPlayer();
         MovePlayer();
         cam.transform.position = transform.position - new Vector3 (0, 0, 10);
     }
 
-    void FaceCursor()
+    void TurnPlayer()
     {
         Vector2 mouseScreenPosition = cam.ScreenToWorldPoint(Input.mousePosition);
         Vector2 direction = (mouseScreenPosition - (Vector2) transform.position).normalized;
         transform.up = direction;
+        float angle = Mathf.Atan2(direction.y, direction.x);
+        
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector2.up);
+        if (hit.collider != null)
+        {
+            Debug.Log(hit.collider.gameObject);
+        }
+
     }
 
     void MovePlayer()
@@ -48,4 +56,5 @@ public class PlayerScript : MonoBehaviour
             transform.position += new Vector3(-moveSpeed, 0, 0);
         }
     }
+
 }
