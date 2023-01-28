@@ -5,17 +5,19 @@ using UnityEngine;
 public class PlayerScript : MonoBehaviour
 {
     public Camera cam;
-    const float moveSpeed = 0.25f;
+    public float speed;
+    private Rigidbody2D body;
 
     void Start()
     {
-        
+        body = GetComponent<Rigidbody2D>();
     }
 
     void FixedUpdate()
     {
         TurnPlayer();
         MovePlayer();
+        Raycast();
         cam.transform.position = transform.position - new Vector3 (0, 0, 10);
     }
 
@@ -36,25 +38,27 @@ public class PlayerScript : MonoBehaviour
 
     void MovePlayer()
     {
-        if (Input.GetKey("w"))
+        body.velocity = new Vector2(Input.GetAxis("Horizontal") * speed, Input.GetAxis("Vertical") * speed);
+    }
+
+    void Raycast()
+    {
+        //Length of the ray
+        float laserLength = 50f;
+        Vector2 mouseScreenPosition = cam.ScreenToWorldPoint(Input.mousePosition);
+
+        //Get the first object hit by the ray
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, mouseScreenPosition, laserLength);
+
+        //If the collider of the object hit is not NUll
+        if (hit.collider != null)
         {
-            transform.position += new Vector3(0, moveSpeed, 0);
+            //Hit something, print the tag of the object
+            Debug.Log("Hitting: " + hit.collider.tag);
         }
 
-        if (Input.GetKey("s"))
-        {
-            transform.position += new Vector3(0, -moveSpeed, 0);
-        }
-
-        if (Input.GetKey("d"))
-        {
-            transform.position += new Vector3(moveSpeed, 0, 0);
-        }
-
-        if (Input.GetKey("a"))
-        {
-            transform.position += new Vector3(-moveSpeed, 0, 0);
-        }
+        //Method to draw the ray in scene for debug purpose
+        Debug.DrawRay(transform.position, mouseScreenPosition, Color.red);
     }
 
 }
