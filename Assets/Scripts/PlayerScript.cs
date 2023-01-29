@@ -52,8 +52,8 @@ public class PlayerScript : MonoBehaviour
         transform.up = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
         
         float lineDistance = 10;
-        float spread = 0.075f;
-        int numLines = 13;
+        float spread = 0.05f;
+        int numLines = 18;
 
         oldVisible.Clear();
         foreach (GameObject go in newVisible)
@@ -65,8 +65,8 @@ public class PlayerScript : MonoBehaviour
         for (int i = 0; i < numLines; i++)
         {
             float adjust = (i * spread) - (spread * (numLines / 2));
-            Vector2 rayDirection = new Vector2(lineDistance * Mathf.Cos(angle + adjust), lineDistance * Mathf.Sin(angle + adjust));
-            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, 10);
+            Vector2 rayDirection = new Vector2(Mathf.Cos(angle + adjust), Mathf.Sin(angle + adjust));
+            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, lineDistance);
 
             foreach (RaycastHit2D hit in hits)
             {
@@ -88,6 +88,63 @@ public class PlayerScript : MonoBehaviour
             Vector2 rayLine = new Vector2(lineDistance * Mathf.Cos(angle + adjust), lineDistance * Mathf.Sin(angle + adjust));
             Debug.DrawRay(transform.position, rayLine, Color.red);
         }
+
+        // Ray casting for behind
+        numLines = 25;
+        lineDistance = 1f;
+        float leftAngle = angle + Mathf.PI / 6f;
+        spread = 2f * Mathf.PI / numLines;
+        for (int i = 0; i < numLines; i++)
+        {
+            Vector2 rayDirection = new Vector2(Mathf.Cos(leftAngle+spread*i), Mathf.Sin(leftAngle+spread*i));
+            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, lineDistance);
+
+            foreach (RaycastHit2D hit in hits)
+            {
+                if (hit.collider.gameObject != gameObject)
+                {
+                    if (hit.collider.tag == "Wall")
+                    {
+                        break;
+                    }
+
+                    if (!newVisible.Contains(hit.collider.gameObject))
+                    {
+                        //Debug.Log("Can see: " + hit.collider.gameObject);
+                        newVisible.Add(hit.collider.gameObject);
+                    }
+                }
+            }
+
+            Vector2 rayLine = new Vector2(lineDistance * Mathf.Cos(leftAngle+spread*i), lineDistance * Mathf.Sin(leftAngle+spread*i));
+            Debug.DrawRay(transform.position, rayLine, Color.red);
+        }
+        // Debug.DrawRay(transform.position, new Vector2(lineDistance * Mathf.Cos(leftAngle), lineDistance * Mathf.Sin(leftAngle)), Color.green);
+        // for (float i = 0; i <= leftAngle+Mathf.PI; i+=Mathf.PI/12)
+        // {
+        //     Vector2 rayDirection = new Vector2(lineDistance / 4 * Mathf.Cos(leftAngle+i), lineDistance / 4 * Mathf.Sin(leftAngle+i));
+        //     RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, lineDistance / 4);
+
+        //     foreach (RaycastHit2D hit in hits)
+        //     {
+        //         if (hit.collider.gameObject != gameObject)
+        //         {
+        //             if (hit.collider.tag == "Wall")
+        //             {
+        //                 break;
+        //             }
+
+        //             if (!newVisible.Contains(hit.collider.gameObject))
+        //             {
+        //                 //Debug.Log("Can see: " + hit.collider.gameObject);
+        //                 newVisible.Add(hit.collider.gameObject);
+        //             }
+        //         }
+        //     }
+            
+        //     Vector2 rayLine = new Vector2(lineDistance/4 * Mathf.Cos(leftAngle+i), lineDistance/4 * Mathf.Sin(leftAngle+i));
+        //     Debug.DrawRay(transform.position, rayLine, Color.red);
+        // }
 
         foreach (GameObject go in oldVisible)
         {
