@@ -6,6 +6,7 @@ public class PlayerScript : MonoBehaviour
 {
     public Camera cam;
     public float speed;
+    private float playerRotation = Mathf.PI / 2f;
     private Rigidbody2D body;
     private List<GameObject> newVisible = new List<GameObject>(), oldVisible = new List<GameObject>();
 
@@ -25,8 +26,30 @@ public class PlayerScript : MonoBehaviour
     {
         Vector2 mouseScreenPosition = cam.ScreenToWorldPoint(Input.mousePosition);
         Vector2 direction = (mouseScreenPosition - (Vector2) transform.position).normalized;
-        transform.up = direction;
-        float angle = Mathf.Atan2(direction.y, direction.x);
+        float desiredAngle = Mathf.Atan2(direction.y, direction.x);
+
+        if (desiredAngle > Mathf.PI / 2 && playerRotation < -Mathf.PI / 2)
+        {
+            playerRotation += Mathf.PI * 2;
+        }
+        else if (desiredAngle < -Mathf.PI / 2 && playerRotation > Mathf.PI / 2)
+        {
+            desiredAngle += Mathf.PI * 2;
+        }
+
+        float angle = (desiredAngle - playerRotation) * 0.1f + playerRotation;
+
+        if (angle > Mathf.PI)
+        {
+            angle -= Mathf.PI * 2;
+        }
+        else if (angle < -Mathf.PI)
+        {
+            angle += Mathf.PI * 2;
+        }
+
+        playerRotation = angle;
+        transform.up = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
         
         float lineDistance = 10;
         float spread = 0.075f;
@@ -42,7 +65,8 @@ public class PlayerScript : MonoBehaviour
         for (int i = 0; i < numLines; i++)
         {
             float adjust = (i * spread) - (spread * (numLines / 2));
-            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, new Vector2(lineDistance * Mathf.Cos(angle + adjust), lineDistance * Mathf.Sin(angle + adjust)), 10);
+            Vector2 rayDirection = new Vector2(lineDistance * Mathf.Cos(angle + adjust), lineDistance * Mathf.Sin(angle + adjust));
+            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, 10);
 
             foreach (RaycastHit2D hit in hits)
             {
@@ -61,26 +85,25 @@ public class PlayerScript : MonoBehaviour
                 }
             }
 
-            foreach (GameObject go in oldVisible)
-            {
-                if (!newVisible.Contains(go))
-                {
-                    go.GetComponent<SpriteRenderer>().enabled = false;
-                }
-            }
-
-            foreach (GameObject go in newVisible)
-            {
-                //if (!oldVisible.Contains(go))
-                //{
-                go.GetComponent<SpriteRenderer>().enabled = true;
-                //}
-            }
-
             Vector2 rayLine = new Vector2(lineDistance * Mathf.Cos(angle + adjust), lineDistance * Mathf.Sin(angle + adjust));
             Debug.DrawRay(transform.position, rayLine, Color.red);
         }
-        
+
+        foreach (GameObject go in oldVisible)
+        {
+            if (!newVisible.Contains(go))
+            {
+                go.GetComponent<SpriteRenderer>().enabled = false;
+            }
+        }
+
+        foreach (GameObject go in newVisible)
+        {
+            if (!oldVisible.Contains(go))
+            {
+                go.GetComponent<SpriteRenderer>().enabled = true;
+            }
+        }
 
     }
 
