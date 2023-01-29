@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - NeedsLOS
+  - Wall
   layers:
   - Default
   - TransparentFX
