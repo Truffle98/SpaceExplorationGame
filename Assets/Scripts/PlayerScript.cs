@@ -51,7 +51,7 @@ public class PlayerScript : MonoBehaviour
         playerRotation = angle;
         transform.up = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
         
-        float lineDistance = 10;
+        float lineDistance = 15;
         float spread = 0.05f;
         int numLines = 18;
 
@@ -91,7 +91,7 @@ public class PlayerScript : MonoBehaviour
 
         // Ray casting for behind
         numLines = 25;
-        lineDistance = 1f;
+        lineDistance = 2f;
         float leftAngle = angle + Mathf.PI / 6f;
         spread = 2f * Mathf.PI / numLines;
         for (int i = 0; i < numLines; i++)
