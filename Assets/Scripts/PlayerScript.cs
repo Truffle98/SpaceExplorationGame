@@ -16,7 +16,7 @@ public class PlayerScript : MonoBehaviour
         body = GetComponent<Rigidbody2D>();
     }
 
-    void FixedUpdate()
+    void Update()
     {
         TurnPlayer();
         RaycastVision();
