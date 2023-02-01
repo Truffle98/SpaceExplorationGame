@@ -9,13 +9,13 @@ public class RandomGenerationScript : MonoBehaviour
 
     void Start()
     {
-        var boundaries = new BoundsInt(new Vector3Int(-100, -100, 0), new Vector3Int(200, 200, 0));
+        var boundaries = new BoundsInt(new Vector3Int(-300, -300, 0), new Vector3Int(600, 600, 0));
 
-        List<BoundsInt> rooms = BinarySpacePartitioning(boundaries, 10, 10, 50, 50);
+        List<BoundsInt> rooms = BinarySpacePartitioning(boundaries, 30, 30, 70, 70);
         foreach(BoundsInt room in rooms)
         {
             var newRoom = Instantiate(roomPrefab, room.center, new Quaternion(0,0,0,0));
-            newRoom.transform.localScale = new Vector3(room.size.x / 2, room.size.y / 2, 1);
+            newRoom.transform.localScale = new Vector3(room.size.x * 0.8f, room.size.y * 0.8f, 1);
         }
     }
 
@@ -29,7 +29,7 @@ public class RandomGenerationScript : MonoBehaviour
             var room = roomsQueue.Dequeue();
             if(room.size.y >= minHeight && room.size.x >= minWidth)
             {
-                if (Random.value > ((roomsList.Count * 8) - 32) / 100f || room.size.y > maxHeight || room.size.x > maxWidth)
+                if (Random.value > ((roomsList.Count * 4) - 32) / 100f || room.size.y > maxHeight || room.size.x > maxWidth || true)
                 {
                     if(Random.value < 0.5f)
                     {

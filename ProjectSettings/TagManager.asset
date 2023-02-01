@@ -6,6 +6,7 @@ TagManager:
   tags:
   - NeedsLOS
   - Wall
+  - SceneChange
   layers:
   - Default
   - TransparentFX

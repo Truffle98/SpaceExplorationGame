@@ -13,6 +13,8 @@ public class PlayerScript : MonoBehaviour
 
     void Start()
     {
+        DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(cam);
         body = GetComponent<Rigidbody2D>();
     }
 
@@ -55,55 +57,6 @@ public class PlayerScript : MonoBehaviour
         playerRotation = angle;
         transform.up = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
 
-        // Local vision raycasting section
-        int numLines = 25; // 25 raycasting lines
-        float lineDistance = 2f; // How far local vision extends (2 units)
-        float leftAngle = angle + Mathf.PI / 6f; // Left angle represents where we should start drawing the rays
-        float spread = 2f * Mathf.PI / numLines; // Defines the spread between each ray (evenly spaced over 2PI by 25 lines)
-
-        // Updating the oldVisible array
-        oldVisible.Clear();
-        foreach (GameObject go in newVisible)
-        {
-            oldVisible.Add(go);
-        }
-        newVisible.Clear();
-
-        // Creating rays for local vision and changing visibility on objects appropriately
-        for (int i = 0; i < numLines; i++)
-        {
-            Vector2 rayDirection = new Vector2(Mathf.Cos(leftAngle+spread*i), Mathf.Sin(leftAngle+spread*i));
-            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, lineDistance);
-
-            foreach (RaycastHit2D hit in hits)
-            {
-                if (hit.collider.gameObject != gameObject) // Make sure the object we detect isn't the player
-                {
-                    if (hit.collider.tag == "Wall")
-                    {
-                        break;
-                    }
-
-                    newVisible.Add(hit.collider.gameObject);
-                    if (!oldVisible.Contains(hit.collider.gameObject))
-                    {
-                        hit.collider.gameObject.GetComponent<SpriteRenderer>().enabled = true;
-                    }
-                }
-            }
-
-            Vector2 rayLine = new Vector2(lineDistance * Mathf.Cos(leftAngle+spread*i), lineDistance * Mathf.Sin(leftAngle+spread*i));
-            Debug.DrawRay(transform.position, rayLine, Color.red);
-        }
-
-        // Disable no longer visible objects
-        foreach (GameObject go in oldVisible)
-        {
-            if (!newVisible.Contains(go))
-            {
-                go.GetComponent<SpriteRenderer>().enabled = false;
-            }
-        }
     }
 
     void MovePlayer()
@@ -121,7 +74,7 @@ public class PlayerScript : MonoBehaviour
         for (int i = 0; i < numLines; i++)
         {
             float adjust = (i * spread) - (spread * (numLines / 2));
-            Vector2 rayDirection = new Vector2(Mathf.Cos(angle + adjust), Mathf.Sin(angle + adjust));
+            var rayDirection = new Vector2(Mathf.Cos(angle + adjust), Mathf.Sin(angle + adjust));
             RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, lineDistance);
 
             foreach (RaycastHit2D hit in hits)
@@ -131,21 +84,48 @@ public class PlayerScript : MonoBehaviour
                     if (hit.collider.tag == "Wall")
                     {
                         break;
-                    } else {
-                        VisibilityScript vs = hit.collider.gameObject.GetComponent<VisibilityScript>();
-                        if (vs != null)
+                    } else if (hit.collider.tag == "NeedsLOS")
+                    {
+                        var vs = hit.collider.gameObject.GetComponent<VisibilityScript>();
+                        if (vs.isVisible)
                         {
                             inVision.Add(hit.collider.gameObject);
-                            if (vs.isVisible)
-                            {
-                                hit.collider.gameObject.GetComponent<SpriteRenderer>().enabled = true;
-                            }
+                            hit.collider.gameObject.GetComponent<SpriteRenderer>().enabled = true;
                         }
                     }
                 }
             }
             
-            Vector2 rayLine = new Vector2(lineDistance * Mathf.Cos(angle+adjust), lineDistance * Mathf.Sin(angle+adjust));
+            var rayLine = new Vector2(lineDistance * Mathf.Cos(angle+adjust), lineDistance * Mathf.Sin(angle+adjust));
+            Debug.DrawRay(transform.position, rayLine, Color.red);
+        }
+
+        // Ray casting for behind
+        numLines = 25;
+        lineDistance = 3f;
+        spread = 2f * Mathf.PI / numLines;
+        for (int i = 0; i < numLines; i++)
+        {
+            Vector2 rayDirection = new Vector2(Mathf.Cos(spread*i), Mathf.Sin(spread*i));
+            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, lineDistance);
+
+            foreach (RaycastHit2D hit in hits)
+            {
+                if (hit.collider.gameObject != gameObject)
+                {
+                    if (hit.collider.tag == "Wall")
+                    {
+                        break;
+                    }
+                    else if (hit.collider.tag == "NeedsLOS")
+                    {
+                        hit.collider.gameObject.GetComponent<SpriteRenderer>().enabled = true;
+                        newVisible.Add(hit.collider.gameObject);
+                    }
+                }
+            }
+
+            Vector2 rayLine = new Vector2(lineDistance * Mathf.Cos(spread*i), lineDistance * Mathf.Sin(spread*i));
             Debug.DrawRay(transform.position, rayLine, Color.red);
         }
 

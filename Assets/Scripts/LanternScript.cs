@@ -35,10 +35,7 @@ public class LanternScript : MonoBehaviour
                     {
                         break;
                     }
-                    
-                    VisibilityScript vs = hit.collider.gameObject.GetComponent<VisibilityScript>();
-
-                    if (vs != null)
+                    else if (hit.collider.tag == "NeedsLOS")
                     {
                         hit.collider.gameObject.GetComponent<VisibilityScript>().isVisible = true;
                     }
