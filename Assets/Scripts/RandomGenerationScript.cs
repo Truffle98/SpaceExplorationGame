@@ -29,7 +29,7 @@ public class RandomGenerationScript : MonoBehaviour
             var room = roomsQueue.Dequeue();
             if(room.size.y >= minHeight && room.size.x >= minWidth)
             {
-                if (Random.value > ((roomsList.Count * 4) - 32) / 100f || room.size.y > maxHeight || room.size.x > maxWidth || true)
+                if (Random.value > ((roomsList.Count * 4) - 32) / 100f || room.size.y > maxHeight || room.size.x > maxWidth)
                 {
                     if(Random.value < 0.5f)
                     {
