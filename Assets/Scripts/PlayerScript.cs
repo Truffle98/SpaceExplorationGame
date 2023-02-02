@@ -143,4 +143,10 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
+    public void MovingRooms()
+    {
+        inVision.Clear();
+        oldInVision.Clear();
+    }
+
 }

@@ -1,22 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class RandomGenerationScript : MonoBehaviour
 {
 
-    public GameObject roomPrefab;
+    public GameObject buildingPrefab;
+    public Tilemap backMap, frontMap;
+    public TileBase ground, buildingWall, floor;
 
     void Start()
     {
-        var boundaries = new BoundsInt(new Vector3Int(-300, -300, 0), new Vector3Int(600, 600, 0));
-
-        List<BoundsInt> rooms = BinarySpacePartitioning(boundaries, 30, 30, 70, 70);
-        foreach(BoundsInt room in rooms)
+        var boundaries = new BoundsInt(new Vector3Int(-300, -300, -1), new Vector3Int(600, 600, 2));
+        List<BoundsInt> buildingBounds = BinarySpacePartitioning(boundaries, 30, 30, 70, 70);
+        backMap.SetTile(new Vector3Int(-300, -300, 0), ground);
+        backMap.SetTile(new Vector3Int(300, 300, 0), ground);
+        backMap.FloodFill(new Vector3Int(0, 0, 0), ground);
+        foreach(BoundsInt building in buildingBounds)
         {
-            var newRoom = Instantiate(roomPrefab, room.center, new Quaternion(0,0,0,0));
-            newRoom.transform.localScale = new Vector3(room.size.x * 0.8f, room.size.y * 0.8f, 1);
+            frontMap.BoxFill(Vector3Int.FloorToInt(building.center), buildingWall, building.min.x, building.min.y, building.max.x, building.max.y);
         }
+
     }
 
     List<BoundsInt> BinarySpacePartitioning(BoundsInt spaceToSplit, int minWidth, int minHeight, int maxWidth, int maxHeight)
@@ -39,7 +44,7 @@ public class RandomGenerationScript : MonoBehaviour
                         }else if(room.size.x >= minWidth * 2)
                         {
                             SplitVertically(minWidth, roomsQueue, room);
-                        }else
+                        }else if (CheckRoomValid(room))
                         {
                             roomsList.Add(room);
                         }
@@ -54,13 +59,13 @@ public class RandomGenerationScript : MonoBehaviour
                         {
                             SplitHorizontally(minHeight, roomsQueue, room);
                         }
-                        else
+                        else if (CheckRoomValid(room))
                         {
                             roomsList.Add(room);
                         }
                     }
                 }
-                else
+                else if (CheckRoomValid(room))
                 {
                     roomsList.Add(room);
                 }
@@ -88,4 +93,52 @@ public class RandomGenerationScript : MonoBehaviour
         roomsQueue.Enqueue(room1);
         roomsQueue.Enqueue(room2);
     }
+
+    private int clearDistance = 20;
+    bool CheckRoomValid(BoundsInt room)
+    {
+        if (room.Contains(new Vector3Int(0,0,0)))
+        {
+            return false;
+        }
+        else if (room.Contains(new Vector3Int(clearDistance, clearDistance, 0)))
+        {
+            return false;
+        }
+        else if (room.Contains(new Vector3Int(clearDistance, -clearDistance, 0)))
+        {
+            return false;
+        }
+        else if (room.Contains(new Vector3Int(-clearDistance, clearDistance, 0)))
+        {
+            return false;
+        }
+        else if (room.Contains(new Vector3Int(-clearDistance, -clearDistance, 0)))
+        {
+            return false;
+        }
+        return true;
+    }
 }
+
+/*
+public class Building
+{
+
+    private BoundsInt boundaries;
+    private GameObject buildingPrefab, myBuilding;
+
+    public Building(BoundsInt boundariesTemp, GameObject buildingPrefabTemp)
+    {
+        boundaries = boundariesTemp;
+        buildingPrefab = buildingPrefabTemp;
+    }
+
+    public void MakeBuilding()
+    {
+        myBuilding = GameObject.Instantiate(buildingPrefab, boundaries.center, new Quaternion(0,0,0,0));
+        myBuilding.transform.localScale = new Vector3(boundaries.size.x, boundaries.size.y, 1);
+    }
+
+}
+*/
