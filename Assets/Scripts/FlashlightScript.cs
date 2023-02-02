@@ -64,7 +64,7 @@ public class FlashlightScript : MonoBehaviour
             {
                 if (go != gameObject.transform.parent.gameObject)
                 {
-                    go.GetComponent<SpriteRenderer>().enabled = false;
+                    go.GetComponent<VisibilityScript>().isVisible = false;
                 }
             }
             newVisible.Clear();
@@ -102,9 +102,11 @@ public class FlashlightScript : MonoBehaviour
                     {
                         break;
                     }
-
-                    newVisible.Add(hit.collider.gameObject);
-                    hit.collider.gameObject.GetComponent<SpriteRenderer>().enabled = true;
+                    else if (hit.collider.tag == "NeedsLOS")
+                    {
+                        hit.collider.gameObject.GetComponent<VisibilityScript>().isVisible = true;
+                        newVisible.Add(hit.collider.gameObject);
+                    }
                 }
             }
 
@@ -116,8 +118,13 @@ public class FlashlightScript : MonoBehaviour
         {
             if (!newVisible.Contains(go))
             {
-                go.GetComponent<SpriteRenderer>().enabled = false;
+                go.GetComponent<VisibilityScript>().isVisible = false;
             }
+        }
+
+        foreach (GameObject go in newVisible)
+        {
+            oldVisible.Add(go);
         }
     }
 }
