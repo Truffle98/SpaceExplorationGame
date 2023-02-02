@@ -13,6 +13,7 @@ public class SceneChangeScript : MonoBehaviour
     {
         if (other.tag == "Player")
         {
+            other.gameObject.GetComponent<PlayerScript>().MovingRooms();
             other.gameObject.transform.position = new Vector3(newPlayerLocation.x, newPlayerLocation.y, 0);
             SceneManager.LoadScene(newSceneName);
         }
