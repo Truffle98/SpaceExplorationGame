@@ -198,6 +198,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3e19da5dbd94894fafd2f93c517b2cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  width: 7
+  testColors: []
   buildingPrefab: {fileID: 7218652396442450837, guid: 7f1753f92f3c5ac459d03eff91d02944, type: 3}
   backMap: {fileID: 1108006034}
   frontMap: {fileID: 444766030}
@@ -231,6 +233,8 @@ GameObject:
   - component: {fileID: 444766030}
   - component: {fileID: 444766029}
   - component: {fileID: 444766031}
+  - component: {fileID: 444766034}
+  - component: {fileID: 444766033}
   - component: {fileID: 444766032}
   m_Layer: 0
   m_Name: Buildings
@@ -353,11 +357,50 @@ TilemapCollider2D:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_UsedByEffector: 0
-  m_UsedByComposite: 0
+  m_UsedByComposite: 1
   m_Offset: {x: 0, y: 0}
   m_MaximumTileChangeCount: 1000
   m_ExtrusionFactor: 0.00001
---- !u!50 &444766032
+--- !u!114 &444766032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 444766027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff989851214803b4590dbb66faed749b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliderHash: 2402751819
+  m_SelfShadows: 1
+  m_ApplyToSortingLayers: -1
+--- !u!66 &444766033
+CompositeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 444766027}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_GeometryType: 0
+  m_GenerationType: 0
+  m_EdgeRadius: 0
+  m_ColliderPaths:
+  - m_Collider: {fileID: 444766031}
+    m_ColliderPaths: []
+  m_CompositePaths:
+    m_Paths: []
+  m_VertexDistance: 0.0005
+  m_OffsetDistance: 0.00005
+--- !u!50 &444766034
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 0
@@ -365,14 +408,14 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 444766027}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
