@@ -22,7 +22,7 @@ public class Door
 
     }
 
-    public void DrawSelf(Tilemap map)
+    public void DrawSelf(Tilemap frontMap, Tilemap backMap)
     {
         
         Vector2Int cornerOne = new Vector2Int(0,0), cornerTwo = new Vector2Int(0,0);
@@ -48,7 +48,7 @@ public class Door
         {
             for (int j = bottomLeft.y; j <= topRight.y; j++)
             {
-                map.SetTile(new Vector3Int(i, j, 0), null);
+                frontMap.SetTile(new Vector3Int(i, j, 0), null);
             }
         }
 

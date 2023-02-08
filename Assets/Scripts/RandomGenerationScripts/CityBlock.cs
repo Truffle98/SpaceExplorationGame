@@ -19,7 +19,7 @@ public class CityBlock
         SelfSetup();
     }
 
-    public void DrawSelf(Tilemap map)
+    public void DrawSelf(Tilemap frontMap, Tilemap backMap)
     {
 
         if (blockType == "block")
@@ -33,7 +33,7 @@ public class CityBlock
 
         foreach (Building building in buildings)
         {
-            building.DrawSelf(map);
+            building.DrawSelf(frontMap, backMap);
         }
 
     }
@@ -43,7 +43,7 @@ public class CityBlock
 
         if (blockType == "block")
         {
-            buildings.Add(new Building(new BoundsInt(new Vector3Int(bounds.min.x, bounds.min.y, -1), new Vector3Int(bounds.size.x, bounds.size.y, 2)), tile, "block"));
+            buildings.Add(new Building(new BoundsInt(new Vector3Int(bounds.min.x, bounds.min.y, -1), new Vector3Int(bounds.size.x, bounds.size.y, 2)), tile, "testBuilding"));
         }
 
     }

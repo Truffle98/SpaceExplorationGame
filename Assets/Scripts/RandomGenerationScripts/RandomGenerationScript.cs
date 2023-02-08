@@ -96,7 +96,7 @@ public class RandomGenerationScript : MonoBehaviour
         frontMap.SetTile(new Vector3Int(bottomLeft.x, bottomLeft.y, 0), buildingWall);
         frontMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), buildingWall);
 
-        cityMap[0,0].DrawSelf(frontMap);
+        cityMap[0,0].DrawSelf(frontMap, backMap);
         for (int i = 0; i < width; i++)
         {
 

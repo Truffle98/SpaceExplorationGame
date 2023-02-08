@@ -20,12 +20,14 @@ public class Room
 
     }
 
-    public void DrawSelf(Tilemap map)
+    public void DrawSelf(Tilemap frontMap, Tilemap backMap)
     {
         //Debug.Log(bounds.center);
         //Debug.Log(bounds.min);
         //Debug.Log(bounds.max);
-        map.BoxFill(Vector3Int.FloorToInt(bounds.center), null, bounds.min.x + 1, bounds.min.y + 1, bounds.max.x - 1, bounds.max.y - 1);
+        frontMap.BoxFill(Vector3Int.FloorToInt(bounds.center), null, bounds.min.x + 1, bounds.min.y + 1, bounds.max.x - 1, bounds.max.y - 1);
+        TileBase floor = Resources.Load<TileBase>("RoomAssets/Floors/" + template.floorType);
+        backMap.BoxFill(Vector3Int.FloorToInt(bounds.center), floor, bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
     }
 
 }
