@@ -178,7 +178,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 249165229}
-  - component: {fileID: 249165228}
+  - component: {fileID: 249165230}
   m_Layer: 0
   m_Name: GenerationController
   m_TagString: Untagged
@@ -186,26 +186,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &249165228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 249165227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3e19da5dbd94894fafd2f93c517b2cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  width: 3
-  testColors: []
-  buildingPrefab: {fileID: 7218652396442450837, guid: 7f1753f92f3c5ac459d03eff91d02944, type: 3}
-  backMap: {fileID: 1108006034}
-  frontMap: {fileID: 444766030}
-  ground: {fileID: 11400000, guid: 74600119f35ffa542a0dd96fb631196f, type: 2}
-  buildingWall: {fileID: 11400000, guid: 817b5904295885346a64e3eb5fc982e3, type: 2}
-  floor: {fileID: 0}
 --- !u!4 &249165229
 Transform:
   m_ObjectHideFlags: 0
@@ -221,6 +201,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &249165230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 249165227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfb9b2ffb14275f449ee5f26e8a9be21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  width: 3
+  testColors: []
+  buildingPrefab: {fileID: 0}
+  backMap: {fileID: 1108006034}
+  frontMap: {fileID: 444766030}
+  ground: {fileID: 11400000, guid: 74600119f35ffa542a0dd96fb631196f, type: 2}
+  buildingWall: {fileID: 11400000, guid: 817b5904295885346a64e3eb5fc982e3, type: 2}
+  floor: {fileID: 0}
 --- !u!1 &444766027
 GameObject:
   m_ObjectHideFlags: 0
