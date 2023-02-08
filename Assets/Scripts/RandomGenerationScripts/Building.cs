@@ -22,7 +22,6 @@ public class Building
         
         TemplateReader reader = new TemplateReader();
         roomSetups = reader.ReadBuildingTemplate(buildingType);
-        //rooms = SplitBuilding(new BoundsInt(new Vector3Int(bounds.min.x + 1, bounds.min.y + 1, 0), new Vector3Int(bounds.size.x - 2, bounds.size.y - 2, 0)), 5, 5, 30, 30);
 
     }
 
@@ -40,85 +39,6 @@ public class Building
         {
             door.DrawSelf(frontMap, backMap);
         }
-    }
-
-    private List<Room> SplitBuilding(BoundsInt spaceToSplit, int minWidth, int minHeight, int maxWidth, int maxHeight)
-    {
-
-        Queue<BoundsInt> roomsQueue = new Queue<BoundsInt>();
-        List<BoundsInt> boundsList = new List<BoundsInt>();
-        List<Room> roomsList = new List<Room>();
-        roomsQueue.Enqueue(spaceToSplit);
-        while(roomsQueue.Count > 0)
-        {
-            var room = roomsQueue.Dequeue();
-            if(room.size.y >= minHeight && room.size.x >= minWidth)
-            {
-                if (Random.value > 0.4f || room.size.y > maxHeight || room.size.x > maxWidth)
-                {
-                    if(Random.value < 0.5f)
-                    {
-                        if(room.size.y >= minHeight * 2)
-                        {
-                            SplitRoomHorizontally(minHeight, roomsQueue, room);
-                        }else if(room.size.x >= minWidth * 2)
-                        {
-                            SplitRoomVertically(minWidth, roomsQueue, room);
-                        }else
-                        {
-                            boundsList.Add(room);
-                        }
-                    }
-                    else
-                    {
-                        if (room.size.x >= minWidth * 2)
-                        {
-                            SplitRoomVertically(minWidth, roomsQueue, room);
-                        }
-                        else if (room.size.y >= minHeight * 2)
-                        {
-                            SplitRoomHorizontally(minHeight, roomsQueue, room);
-                        }
-                        else
-                        {
-                            boundsList.Add(room);
-                        }
-                    }
-                }
-                else
-                {
-                    boundsList.Add(room);
-                }
-            }
-        }
-
-        foreach (BoundsInt bound in boundsList)
-        {
-            //This got changed and isn't adding rooms
-            //roomsList.Add(new Room(bound, "empty"));
-        }
-
-        return roomsList;
-    }
-
-    void SplitRoomVertically(int minWidth, Queue<BoundsInt> roomsQueue, BoundsInt room)
-    {
-        var xSplit = Random.Range(minWidth, room.size.x - minWidth);
-        BoundsInt room1 = new BoundsInt(room.min, new Vector3Int(xSplit, room.size.y, room.size.z));
-        BoundsInt room2 = new BoundsInt(new Vector3Int(room.min.x + xSplit, room.min.y, room.min.z),
-            new Vector3Int(room.size.x - xSplit, room.size.y, room.size.z));
-        roomsQueue.Enqueue(room1);
-        roomsQueue.Enqueue(room2);
-    }
-
-    void SplitRoomHorizontally(int minHeight, Queue<BoundsInt> roomsQueue, BoundsInt room)
-    {
-        var ySplit = Random.Range(minHeight, room.size.y - minHeight);
-        BoundsInt room1 = new BoundsInt(room.min, new Vector3Int(room.size.x, ySplit, room.size.z));
-        BoundsInt room2 = new BoundsInt(new Vector3Int(room.min.x, room.min.y + ySplit, room.min.z),
-            new Vector3Int(room.size.x, room.size.y - ySplit, room.size.z));
-        roomsQueue.Enqueue(room1);
-        roomsQueue.Enqueue(room2);
     }
 
     //Generates the full room layout of the building
