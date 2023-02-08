@@ -198,7 +198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3e19da5dbd94894fafd2f93c517b2cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 7
+  width: 3
   testColors: []
   buildingPrefab: {fileID: 7218652396442450837, guid: 7f1753f92f3c5ac459d03eff91d02944, type: 3}
   backMap: {fileID: 1108006034}
