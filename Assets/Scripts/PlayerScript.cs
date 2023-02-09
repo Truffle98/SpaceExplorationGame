@@ -23,7 +23,8 @@ public class PlayerScript : MonoBehaviour
         TurnPlayer();
         RaycastVision();
         MovePlayer();
-        MoveCamera();
+        //MoveCamera();
+        cam.transform.position = transform.position - new Vector3(0,0,10);
     }
 
     void TurnPlayer()
