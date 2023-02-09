@@ -16,12 +16,17 @@ public class RandomGenerationScript : MonoBehaviour
 
     private CityBlock[,] cityMap;
     private int blockLength = 60, roadLength = 15;
+    private AstarPath pathfinder;
 
 
     void Start()
     {
         ResetCity();
         DrawCity();
+        //pathfinder = GameObject.Find("A*").GetComponent<AstarPath>();
+        var graphToScan = AstarPath.active.data.gridGraph;
+        AstarPath.active.Scan(graphToScan);
+
 
         /*
         var boundaries = new BoundsInt(new Vector3Int(bottomLeft.x, bottomLeft.y, -1), new Vector3Int(topRight.x-bottomLeft.x, topRight.y-bottomLeft.y, 2));
