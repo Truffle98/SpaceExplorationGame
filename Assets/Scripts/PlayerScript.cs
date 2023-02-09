@@ -23,7 +23,8 @@ public class PlayerScript : MonoBehaviour
         TurnPlayer();
         RaycastVision();
         MovePlayer();
-        cam.transform.position = transform.position - new Vector3 (0, 0, 10);
+        //MoveCamera();
+        cam.transform.position = transform.position - new Vector3(0,0,10);
     }
 
     void TurnPlayer()
@@ -62,6 +63,11 @@ public class PlayerScript : MonoBehaviour
     void MovePlayer()
     {
         body.velocity = new Vector2(Input.GetAxis("Horizontal") * speed, Input.GetAxis("Vertical") * speed);
+    }
+
+    void MoveCamera()
+    {
+        cam.transform.position = transform.position + new Vector3(Mathf.Cos(angle) * 10, Mathf.Sin(angle) * 20, -10);
     }
 
     void RaycastVision()
