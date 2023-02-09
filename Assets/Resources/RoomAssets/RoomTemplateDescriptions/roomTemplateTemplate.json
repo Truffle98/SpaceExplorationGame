@@ -1,0 +1,15 @@
+{
+    "roomType":null,
+    "doorType":null,
+    "floorType":null,
+    "roomMin":[null, null],
+    "roomMax":[null, null],
+    "roomsToMake":[],
+    "roomsToMakeProbabilities":[],
+    "smallRoomsToMake":[],
+    "smallRoomsToMakeProbabilities":[],
+    "centerObjects":[],
+    "wallObjects":[],
+    "cornerObjects":[],
+    "canAddDoors":null
+}

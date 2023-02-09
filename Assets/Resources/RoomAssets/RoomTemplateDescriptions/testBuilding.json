@@ -1,0 +1,51 @@
+{
+    "roomSetups":[
+        {
+            "roomType":"testingStartRoom",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[10, 10],
+            "roomMax":[16, 16],
+            "roomsToMake":["testingRoom", "testingRoom", "testingRoom", "testingRoom"],
+            "roomsToMakeProbabilities":[100, 75, 50, 25],
+            "smallRoomsToMake":[],
+            "smallRoomsToMakeProbabilities":[],
+            "centerObjects":[],
+            "wallObjects":[],
+            "cornerObjects":[],
+            "canAddDoors":true
+        },
+
+        {
+            "roomType":"testingRoom",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[6, 6],
+            "roomMax":[10, 10],
+            "roomsToMake":["testingRoom", "testingRoom"],
+            "roomsToMakeProbabilities":[100, 50],
+            "smallRoomsToMake":["smallTestingRoom"],
+            "smallRoomsToMakeProbabilities":[50],
+            "centerObjects":[],
+            "wallObjects":[],
+            "cornerObjects":[],
+            "canAddDoors":true
+        },
+
+        {
+            "roomType":"smallTestingRoom",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[4, 4],
+            "roomMax":[6, 6],
+            "roomsToMake":[],
+            "roomsToMakeProbabilities":[],
+            "smallRoomsToMake":[],
+            "smallRoomsToMakeProbabilities":[],
+            "centerObjects":[],
+            "wallObjects":[],
+            "cornerObjects":[],
+            "canAddDoors":false
+        }
+    ]
+}
