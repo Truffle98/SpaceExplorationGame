@@ -10,9 +10,9 @@
             "roomsToMakeProbabilities":[100, 75, 50, 25],
             "smallRoomsToMake":[],
             "smallRoomsToMakeProbabilities":[],
-            "centerObjects":[],
-            "wallObjects":[],
-            "cornerObjects":[],
+            "roomObjects":["testWallObject"],
+            "roomObjectsProbabilities":[100],
+            "roomObjectsCount":[1],
             "canAddDoors":true
         },
 
@@ -26,9 +26,9 @@
             "roomsToMakeProbabilities":[100, 50],
             "smallRoomsToMake":["smallTestingRoom"],
             "smallRoomsToMakeProbabilities":[50],
-            "centerObjects":[],
-            "wallObjects":[],
-            "cornerObjects":[],
+            "roomObjects":[],
+            "roomObjectsProbabilities":[],
+            "roomObjectsCount":[],
             "canAddDoors":true
         },
 
@@ -42,9 +42,9 @@
             "roomsToMakeProbabilities":[],
             "smallRoomsToMake":[],
             "smallRoomsToMakeProbabilities":[],
-            "centerObjects":[],
-            "wallObjects":[],
-            "cornerObjects":[],
+            "roomObjects":[],
+            "roomObjectsProbabilities":[],
+            "roomObjectsCount":[],
             "canAddDoors":false
         }
     ]

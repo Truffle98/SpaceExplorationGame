@@ -17,6 +17,7 @@ public class RandomGenerationScript : MonoBehaviour
     private CityBlock[,] cityMap;
     private int blockLength = 60, roadLength = 15;
     private AstarPath pathfinder;
+    private GameObject cityParent;
 
 
     void Start()
@@ -24,9 +25,7 @@ public class RandomGenerationScript : MonoBehaviour
         ResetCity();
         DrawCity();
         //pathfinder = GameObject.Find("A*").GetComponent<AstarPath>();
-        var graphToScan = AstarPath.active.data.gridGraph;
-        AstarPath.active.Scan(graphToScan);
-
+        StartCoroutine(GeneratePaths());
 
         /*
         var boundaries = new BoundsInt(new Vector3Int(bottomLeft.x, bottomLeft.y, -1), new Vector3Int(topRight.x-bottomLeft.x, topRight.y-bottomLeft.y, 2));
@@ -54,6 +53,8 @@ public class RandomGenerationScript : MonoBehaviour
     void DrawCity()
     {
 
+        cityParent = new GameObject("City Parent");
+
         int totalWidth = width * blockLength + (width + 1) * roadLength;
 
         var bottomLeft = new Vector2Int(-totalWidth / 2, -totalWidth / 2);
@@ -66,11 +67,15 @@ public class RandomGenerationScript : MonoBehaviour
         backMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), ground);
         backMap.FloodFill(new Vector3Int(0, 0, 0), ground);
 
+        GameObject blockParent;
+
         for (int i = 0; i < width; i++)
         {
 
             for (int j = 0; j < width; j++)
             {
+                blockParent = new GameObject("Block Parent " + i + " " + j);
+                blockParent.transform.parent = cityParent.transform;
 
                 if (i != Mathf.Floor(width / 2) || j != Mathf.Floor(width / 2))
                 {
@@ -86,12 +91,12 @@ public class RandomGenerationScript : MonoBehaviour
                     }
 
                     cityMap[i, j] = new CityBlock(new BoundsInt(new Vector3Int(bottomLeft.x + roadLength * (j + 1) + blockLength * j, bottomLeft.y + roadLength * (i + 1) + blockLength * i, -1),
-                                    new Vector3Int(blockLength, blockLength, 2)), buildingWall, buildingType);
+                                    new Vector3Int(blockLength, blockLength, 2)), buildingWall, buildingType, blockParent);
                 }
                 else
                 {
                     cityMap[i, j] = new CityBlock(new BoundsInt(new Vector3Int(bottomLeft.x + roadLength * (j + 1) + blockLength * j, bottomLeft.y + roadLength * (i + 1) + blockLength * i, -1),
-                                    new Vector3Int(blockLength, blockLength, 2)), buildingWall, "empty");
+                                    new Vector3Int(blockLength, blockLength, 2)), buildingWall, "empty", blockParent);
                 }
 
             }
@@ -121,11 +126,17 @@ public class RandomGenerationScript : MonoBehaviour
 
     public void ResetCity()
     {
+        Destroy(cityParent);
         cityMap = new CityBlock[width, width];
         frontMap.ClearAllTiles();
         backMap.ClearAllTiles();
     }
 
+    IEnumerator GeneratePaths()
+    {
+        yield return new WaitForSeconds(.1f);
+        AstarPath.active.Scan();
+    }
     List<BoundsInt> BinarySpacePartitioning(BoundsInt spaceToSplit, int minWidth, int minHeight, int maxWidth, int maxHeight)
     {
         Queue<BoundsInt> roomsQueue = new Queue<BoundsInt>();

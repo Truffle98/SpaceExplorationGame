@@ -15,7 +15,8 @@ public class RoomSetup
     public string roomType, doorType, floorType;
     public string[] roomsToMake, smallRoomsToMake;
     public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities;
-    public string[] centerObjects, wallObjects, cornerObjects;
+    public string[] roomObjects;
+    public int[] roomObjectsProbabilities, roomObjectsCount;
     public bool canAddDoors;
 
     public RoomSetup()
@@ -49,23 +50,15 @@ public class RoomSetup
             smallRoomsToMake[i] = templateJSON.smallRoomsToMake[i];
             smallRoomsToMakeProbabilities[i] = templateJSON.smallRoomsToMakeProbabilities[i];
         }
-
-        centerObjects = new string[templateJSON.centerObjects.Length];
-        for (int i = 0; i < templateJSON.centerObjects.Length; i++)
+        roomObjects = new string[templateJSON.roomObjects.Length];
+        roomObjectsProbabilities = new int[templateJSON.roomObjects.Length];
+        roomObjectsCount = new int[templateJSON.roomObjects.Length];
+        
+        for (int i = 0; i < templateJSON.roomObjects.Length; i++)
         {
-            centerObjects[i] = templateJSON.centerObjects[i];
-        }
-
-        wallObjects = new string[templateJSON.wallObjects.Length];
-        for (int i = 0; i < templateJSON.wallObjects.Length; i++)
-        {
-            wallObjects[i] = templateJSON.wallObjects[i];
-        }
-
-        cornerObjects = new string[templateJSON.cornerObjects.Length];
-        for (int i = 0; i < templateJSON.cornerObjects.Length; i++)
-        {
-            cornerObjects[i] = templateJSON.cornerObjects[i];
+            roomObjects[i] = templateJSON.roomObjects[i];
+            roomObjectsProbabilities[i] = templateJSON.roomObjectsProbabilities[i];
+            roomObjectsCount[i] = templateJSON.roomObjectsCount[i];
         }
 
         canAddDoors = templateJSON.canAddDoors;
