@@ -12,13 +12,15 @@ public class Building
     private List<Room> rooms = new List<Room>();
     private List<Door> doors = new List<Door>();
     private Dictionary<string, RoomSetup> roomSetups;
+    private GameObject buildingParent;
 
-    public Building(BoundsInt boundsTemp, TileBase tileTemp, string typeTemp)
+    public Building(BoundsInt boundsTemp, TileBase tileTemp, string typeTemp, GameObject parentTemp)
     {
 
         bounds = boundsTemp;
         tile = tileTemp;
         buildingType = typeTemp;
+        buildingParent = parentTemp;
         
         TemplateReader reader = new TemplateReader();
         roomSetups = reader.ReadBuildingTemplate(buildingType);
@@ -32,7 +34,7 @@ public class Building
 
         foreach (Room room in rooms)
         {
-            room.DrawSelf(frontMap, backMap);
+            room.DrawSelf(frontMap, backMap, doors, buildingParent);
         }
 
         foreach (Door door in doors)

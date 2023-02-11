@@ -8,8 +8,8 @@
     "roomsToMakeProbabilities":[],
     "smallRoomsToMake":[],
     "smallRoomsToMakeProbabilities":[],
-    "centerObjects":[],
-    "wallObjects":[],
-    "cornerObjects":[],
+    "roomObjects":[],
+    "roomObjectsProbabilities:":[],
+    "roomObjectsCount:":[],
     "canAddDoors":null
 }

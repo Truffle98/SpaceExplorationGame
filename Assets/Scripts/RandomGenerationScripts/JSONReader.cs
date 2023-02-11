@@ -38,10 +38,11 @@ public class TemplateJSON
 {
 
     public string roomType, doorType, floorType;
-    public int[] roomMin, roomMax;
+    public int[] roomMin, roomMax, roomObjectsProbabilities;
     public string[] roomsToMake, smallRoomsToMake;
     public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities;
-    public string[] centerObjects, wallObjects, cornerObjects;
+    public string[] roomObjects;
+    public int[] roomObjectsCount;
     public bool canAddDoors;
 
 }
