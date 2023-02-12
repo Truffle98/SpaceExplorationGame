@@ -10,9 +10,9 @@
             "roomsToMakeProbabilities":[100, 75, 50, 25],
             "smallRoomsToMake":[],
             "smallRoomsToMakeProbabilities":[],
-            "roomObjects":["testWallObject"],
-            "roomObjectsProbabilities":[100],
-            "roomObjectsCount":[1],
+            "roomObjects":["testCenterObject", "testWallObject"],
+            "roomObjectsProbabilities":[100, 100],
+            "roomObjectsCount":[4, 3],
             "canAddDoors":true
         },
 

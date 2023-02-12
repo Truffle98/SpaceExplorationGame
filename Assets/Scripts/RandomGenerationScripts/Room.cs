@@ -38,12 +38,13 @@ public class Room
         List<GameObject> roomObjects = new List<GameObject>();
         GameObject curObject;
         RoomObjectScript curObjectScript;
-        Vector2Int startCorner, endCorner, cornerOffsetDirection, offset;
+        Vector2Int startCorner, endCorner, cornerOffsetDirection, offset, offsetDistance;
         int xLength, yLength, sideLength;
         float orientationAngle, orientationOffset, halfPIAdj;
         List<Vector2Int> potentialStartCorners, potentialEndCorners;
         List<float> potentialOrientations;
-        int cornerIdx;
+        List<int> potentialIdx, priorityIdx;
+        int chosenIdx;
         GameObject newObject;
 
         for (int i = 0; i < template.roomObjects.Length; i++)
@@ -67,6 +68,8 @@ public class Room
                         potentialStartCorners = new List<Vector2Int>();
                         potentialEndCorners =  new List<Vector2Int>();
                         potentialOrientations = new List<float>();
+                        potentialIdx = new List<int>();
+                        priorityIdx = new List<int>();
 
                         for (int k = 0; k < 4; k++)
                         {
@@ -86,6 +89,15 @@ public class Room
                             {
                                 if (CheckObjectLocationValid(startCorner, endCorner, curObjectScript, doors, roomObjects))
                                 {
+                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects))
+                                    {
+                                        priorityIdx.Add(potentialStartCorners.Count);
+                                    }
+                                    else
+                                    {
+                                        potentialIdx.Add(potentialStartCorners.Count);
+                                    }
+
                                     potentialStartCorners.Add(startCorner);
                                     potentialEndCorners.Add(endCorner);
                                     potentialOrientations.Add(orientationAngle);
@@ -98,19 +110,28 @@ public class Room
                             orientationAngle += (Mathf.PI / 2);
                         }
 
-                        if (potentialStartCorners.Count > 0)
+                        chosenIdx = -1;
+                        if (priorityIdx.Count > 0)
                         {
-                            cornerIdx = Random.Range(0, potentialStartCorners.Count);
-                            startCorner = potentialStartCorners[cornerIdx];
-                            endCorner = potentialEndCorners[cornerIdx];
-                            orientationAngle = potentialOrientations[cornerIdx] * Mathf.Rad2Deg;
+                            chosenIdx = priorityIdx[Random.Range(0, priorityIdx.Count)];
+                        }
+                        else if (potentialIdx.Count > 0)
+                        {
+                            chosenIdx = potentialIdx[Random.Range(0, potentialIdx.Count)];
+                        }
+
+                        if (chosenIdx != -1)
+                        {
+                            startCorner = potentialStartCorners[chosenIdx];
+                            endCorner = potentialEndCorners[chosenIdx];
+                            orientationAngle = potentialOrientations[chosenIdx] * Mathf.Rad2Deg;
                             newObject = GameObject.Instantiate(curObject, new Vector3(startCorner.x + 0.5f, startCorner.y + 0.5f, 0), Quaternion.Euler(0,0, orientationAngle), buildingParent.transform);
-                            newObject.GetComponent<RoomObjectScript>().AcceptBoundaries(startCorner, endCorner, potentialOrientations[cornerIdx]);
-                            if (Mathf.Abs(Random.Range(0, 100) * Mathf.Cos(potentialOrientations[cornerIdx])) > 50)
+                            newObject.GetComponent<RoomObjectScript>().AcceptBoundaries(startCorner, endCorner, potentialOrientations[chosenIdx]);
+                            if (Mathf.Abs(Random.Range(0, 100) * Mathf.Cos(potentialOrientations[chosenIdx])) > 50)
                             {
                                 newObject.GetComponent<RoomObjectScript>().FlipXAxis();
                             }
-                            else if (Mathf.Abs(Random.Range(0, 100) * Mathf.Sin(potentialOrientations[cornerIdx])) > 50)
+                            else if (Mathf.Abs(Random.Range(0, 100) * Mathf.Sin(potentialOrientations[chosenIdx])) > 50)
                             {
                                 newObject.GetComponent<RoomObjectScript>().FlipYAxis();
                             }
@@ -122,12 +143,111 @@ public class Room
                     else if (curObjectScript.roomPositioning == "center")
                     {
 
+                        orientationAngle = 0;
+                        potentialStartCorners = new List<Vector2Int>();
+                        potentialEndCorners =  new List<Vector2Int>();
+                        potentialOrientations = new List<float>();
+                        potentialIdx = new List<int>();
+                        priorityIdx = new List<int>();
+
+                        xLength = (int)Mathf.Round(Mathf.Abs(Mathf.Cos(orientationAngle) * curObjectScript.size.x + Mathf.Sin(orientationAngle) * curObjectScript.size.y));
+                        yLength = (int)Mathf.Round(Mathf.Abs(Mathf.Cos(orientationAngle) * curObjectScript.size.y + Mathf.Sin(orientationAngle) * curObjectScript.size.x));    
+
+                        orientationOffset = orientationAngle + (Mathf.PI * 5/4);
+                        cornerOffsetDirection = new Vector2Int((int)Mathf.Round(Mathf.Cos(orientationOffset) / 0.707f), (int)Mathf.Round(Mathf.Sin(orientationOffset) / 0.707f));
+                        offsetDistance = new Vector2Int((xLength - 1) * cornerOffsetDirection.x, (yLength - 1) * cornerOffsetDirection.y);
+
+                        for (int x = bounds.min.x + 1; x < bounds.max.x - 1; x++)
+                        {
+                            for (int y = bounds.min.y + 1; y < bounds.max.y - 1; y++)
+                            {
+                                startCorner = new Vector2Int(x, y);
+                                endCorner = startCorner + offsetDistance;
+
+                                if (CheckObjectLocationValid(startCorner, endCorner, curObjectScript, doors, roomObjects))
+                                {
+                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects))
+                                    {
+                                        priorityIdx.Add(potentialStartCorners.Count);
+                                    }
+                                    else
+                                    {
+                                        potentialIdx.Add(potentialStartCorners.Count);
+                                    }
+
+                                    potentialStartCorners.Add(startCorner);
+                                    potentialEndCorners.Add(endCorner);
+                                    potentialOrientations.Add(orientationAngle);
+                                }
+                            }
+                        }
+
+                        orientationAngle += (Mathf.PI / 2);
+                        xLength = (int)Mathf.Round(Mathf.Abs(Mathf.Cos(orientationAngle) * curObjectScript.size.x + Mathf.Sin(orientationAngle) * curObjectScript.size.y));
+                        yLength = (int)Mathf.Round(Mathf.Abs(Mathf.Cos(orientationAngle) * curObjectScript.size.y + Mathf.Sin(orientationAngle) * curObjectScript.size.x));    
+
+                        orientationOffset = orientationAngle + (Mathf.PI * 5/4);
+                        cornerOffsetDirection = new Vector2Int((int)Mathf.Round(Mathf.Cos(orientationOffset) / 0.707f), (int)Mathf.Round(Mathf.Sin(orientationOffset) / 0.707f));
+                        offsetDistance = new Vector2Int((xLength - 1) * cornerOffsetDirection.x, (yLength - 1) * cornerOffsetDirection.y);
+
+
+                        for (int x = bounds.min.x + 1; x < bounds.max.x - 1; x++)
+                        {
+                            for (int y = bounds.min.y + 1; y < bounds.max.y - 1; y++)
+                            {
+                                startCorner = new Vector2Int(x, y);
+                                endCorner = startCorner + offsetDistance;
+
+                                if (CheckObjectLocationValid(startCorner, endCorner, curObjectScript, doors, roomObjects))
+                                {
+                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects))
+                                    {
+                                        priorityIdx.Add(potentialStartCorners.Count);
+                                    }
+                                    else
+                                    {
+                                        potentialIdx.Add(potentialStartCorners.Count);
+                                    }
+
+                                    potentialStartCorners.Add(startCorner);
+                                    potentialEndCorners.Add(endCorner);
+                                    potentialOrientations.Add(orientationAngle);
+                                }
+                            }
+                        }
+
+                        chosenIdx = -1;
+                        if (priorityIdx.Count > 0)
+                        {
+                            chosenIdx = priorityIdx[Random.Range(0, priorityIdx.Count)];
+                        }
+                        else if (potentialIdx.Count > 0)
+                        {
+                            chosenIdx = potentialIdx[Random.Range(0, potentialIdx.Count)];
+                        }
+
+                        if (chosenIdx != -1)
+                        {
+                            startCorner = potentialStartCorners[chosenIdx];
+                            endCorner = potentialEndCorners[chosenIdx];
+                            orientationAngle = potentialOrientations[chosenIdx] * Mathf.Rad2Deg;
+                            newObject = GameObject.Instantiate(curObject, new Vector3(startCorner.x + 0.5f, startCorner.y + 0.5f, 0), Quaternion.Euler(0,0, orientationAngle), buildingParent.transform);
+                            newObject.GetComponent<RoomObjectScript>().AcceptBoundaries(startCorner, endCorner, potentialOrientations[chosenIdx]);
+                            if (Random.Range(0, 100) > 50)
+                            {
+                                newObject.GetComponent<RoomObjectScript>().FlipXAxis();
+                            }
+                            else if (Random.Range(0, 100) > 50)
+                            {
+                                newObject.GetComponent<RoomObjectScript>().FlipYAxis();
+                            }
+
+                            roomObjects.Add(newObject);
+                        }
                     }
                 }
             }
         }
-
-
     }
 
     bool CheckObjectLocationValid(Vector2Int startCorner, Vector2Int endCorner, RoomObjectScript roomObjectScript, List<Door> doors, List<GameObject> gos)
@@ -191,6 +311,47 @@ public class Room
         }
 
         return true;
+    }
+
+    bool CheckObjectLocationPriority(Vector2Int startCorner, Vector2Int endCorner, RoomObjectScript roomObjectScript, List<GameObject> gos)
+    {
+
+        Vector2Int bottomLeft, topRight;
+
+        bottomLeft = new Vector2Int(Mathf.Min(startCorner.x, endCorner.x), Mathf.Min(startCorner.y, endCorner.y));
+        topRight = new Vector2Int(Mathf.Max(startCorner.x, endCorner.x), Mathf.Max(startCorner.y, endCorner.y));
+
+        int clearSpace = 0;
+        if (!roomObjectScript.allowObjectsNear)
+        {
+            clearSpace = 2;
+        }
+
+        BoundsInt GOBounds;
+        foreach(GameObject go in gos)
+        {
+
+            GOBounds = go.GetComponent<RoomObjectScript>().bounds;
+
+            if (clearSpace != 2 && !go.GetComponent<RoomObjectScript>().allowObjectsNear)
+            {
+                clearSpace = 2;
+            }
+
+            for (int i = bottomLeft.x - clearSpace - 1; i <= topRight.x + clearSpace + 1; i++)
+            {
+                for (int j = bottomLeft.y - clearSpace - 1; j <= topRight.y + clearSpace + 1; j++)
+                {
+                    if ((GOBounds.min.x <= i && i <= GOBounds.max.x) && (GOBounds.min.y <= j && j <= GOBounds.max.y))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+
     }
 }
 
