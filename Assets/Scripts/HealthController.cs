@@ -49,7 +49,6 @@ public class HealthController : MonoBehaviour
         } else if (Input.GetKeyDown(KeyCode.H)) {
             ChangeHealth(10);
         }
-        Debug.Log(health);
     }
 
     private void IncreaseAlpha()

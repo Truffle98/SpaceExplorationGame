@@ -9,6 +9,7 @@ public class GridInteract : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     private InventoryController inventoryController;
     private ItemGrid inventory;
     private InventoryHighlight highlighter;
+    private ItemCardHandler itemCard;
 
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -25,6 +26,8 @@ public class GridInteract : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         inventoryController = GameObject.Find("Player").GetComponent<InventoryController>();
         inventory = GetComponent<ItemGrid>();
         highlighter = GetComponent<InventoryHighlight>();
+        itemCard = GetComponent<ItemCardHandler>();
         inventoryController.inventoryHighlight = highlighter;
+        inventoryController.itemCard = itemCard;
     }
 }

@@ -5,14 +5,16 @@ using UnityEngine;
 public class PlayerScript : MonoBehaviour
 {
     public Camera cam;
-    public float speed, angle;
-    private float playerRotation = Mathf.PI / 2f;
+    public float speed, angle, maxCooldown = 500;
+    private float playerRotation = Mathf.PI / 2f, sprintTime, baseSpeed, sprintingSpeed, cooldownTime;
     private Rigidbody2D body;
     private List<GameObject> newVisible = new List<GameObject>(), oldVisible = new List<GameObject>(), 
     inVision = new List<GameObject>(), oldInVision = new List<GameObject>();
 
     void Start()
     {
+        baseSpeed = speed;
+        sprintingSpeed = speed * 2;
         DontDestroyOnLoad(gameObject);
         DontDestroyOnLoad(cam);
         body = GetComponent<Rigidbody2D>();
@@ -20,6 +22,22 @@ public class PlayerScript : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKey(KeyCode.LeftShift) && sprintTime < maxCooldown && cooldownTime == 0)
+        {
+            speed = sprintingSpeed;
+            sprintTime++;
+            if (sprintTime>maxCooldown-1)
+            {
+                cooldownTime = maxCooldown;
+            }
+        } else {
+            speed = baseSpeed;
+            sprintTime = 0;
+            if (cooldownTime > 0)
+            {
+                cooldownTime--;
+            }
+        }
         TurnPlayer();
         RaycastVision();
         MovePlayer();
