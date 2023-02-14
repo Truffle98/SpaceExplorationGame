@@ -14,11 +14,9 @@ public class Room
 
     public Room(BoundsInt boundsTemp, RoomSetup roomTemplate)
     {
-
         bounds = boundsTemp;
         template = roomTemplate;
         roomType = roomTemplate.roomType;
-
     }
 
     public void DrawSelf(Tilemap frontMap, Tilemap backMap, List<Door> doors, GameObject buildingParent)
@@ -39,13 +37,14 @@ public class Room
         GameObject curObject;
         RoomObjectScript curObjectScript;
         Vector2Int startCorner, endCorner, cornerOffsetDirection, offset, offsetDistance;
-        int xLength, yLength, sideLength;
-        float orientationAngle, orientationOffset, halfPIAdj;
+        int xLength, yLength, sideLength, chosenIdx, curDirection, clearSpace, tileCount;
+        float orientationAngle, orientationOffset, halfPIAdj, totalTiles;
         List<Vector2Int> potentialStartCorners, potentialEndCorners;
         List<float> potentialOrientations;
-        List<int> potentialIdx, priorityIdx;
-        int chosenIdx;
+        List<int> potentialIdx, priorityIdx, tileDirections;
         GameObject newObject;
+        int[] expansions;
+        bool enoughRemaining;
 
         for (int i = 0; i < template.roomObjects.Length; i++)
         {
@@ -89,7 +88,7 @@ public class Room
                             {
                                 if (CheckObjectLocationValid(startCorner, endCorner, curObjectScript, doors, roomObjects))
                                 {
-                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects))
+                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects) && curObjectScript.prioritizeNear)
                                     {
                                         priorityIdx.Add(potentialStartCorners.Count);
                                     }
@@ -166,7 +165,7 @@ public class Room
 
                                 if (CheckObjectLocationValid(startCorner, endCorner, curObjectScript, doors, roomObjects))
                                 {
-                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects))
+                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects) && curObjectScript.prioritizeNear)
                                     {
                                         priorityIdx.Add(potentialStartCorners.Count);
                                     }
@@ -200,7 +199,7 @@ public class Room
 
                                 if (CheckObjectLocationValid(startCorner, endCorner, curObjectScript, doors, roomObjects))
                                 {
-                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects))
+                                    if (CheckObjectLocationPriority(startCorner, endCorner, curObjectScript, roomObjects) && curObjectScript.prioritizeNear)
                                     {
                                         priorityIdx.Add(potentialStartCorners.Count);
                                     }
@@ -244,10 +243,196 @@ public class Room
 
                             roomObjects.Add(newObject);
                         }
+                        else
+                        {
+                            break;
+                        }
+
+                        if (curObjectScript.shouldTile)
+                        {
+                            totalTiles = 0;
+                            for (int attemptObj = 0; attemptObj < template.roomObjectsCount[i] - j + 1; attemptObj++)
+                            {
+                                if (Random.Range(0, 100) < template.roomObjectsProbabilities[i])
+                                {
+                                    totalTiles++;
+                                }
+                            }
+                            tileCount = 0;
+                            
+                            curObjectScript = newObject.GetComponent<RoomObjectScript>();
+                            orientationAngle = curObjectScript.orientationAngle;
+
+                            xLength = (int)Mathf.Round(Mathf.Abs(Mathf.Cos(orientationAngle) * curObjectScript.size.x + Mathf.Sin(orientationAngle) * curObjectScript.size.y));
+                            yLength = (int)Mathf.Round(Mathf.Abs(Mathf.Cos(orientationAngle) * curObjectScript.size.y + Mathf.Sin(orientationAngle) * curObjectScript.size.x));    
+
+                            orientationOffset = (Mathf.PI / 4);
+                            cornerOffsetDirection = new Vector2Int((int)Mathf.Round(Mathf.Cos(orientationOffset) / 0.707f), (int)Mathf.Round(Mathf.Sin(orientationOffset) / 0.707f));
+                            offsetDistance = new Vector2Int((xLength - 1) * cornerOffsetDirection.x, (yLength - 1) * cornerOffsetDirection.y);
+                            
+                            clearSpace = 0;
+                            if (!curObjectScript.allowObjectsNear)
+                            {
+                                clearSpace = 2;
+                            }
+
+                            tileDirections = new List<int>();
+                            expansions = new int[4];
+                            for (int num = 0; num < 4; num++)
+                            {
+                                tileDirections.Add(num);
+                                expansions[num] = 0;
+                            }
+
+                            while(tileDirections.Count > 0)
+                            {
+
+                                curDirection = tileDirections[Random.Range(0, tileDirections.Count)];
+                                potentialStartCorners = new List<Vector2Int>();
+                                potentialEndCorners =  new List<Vector2Int>();
+                                enoughRemaining = true;
+
+                                if (curDirection == 0)
+                                {   
+                                    if (tileCount + expansions[1] + expansions[3] + 1 < totalTiles)
+                                    {
+                                        for (int blob = 0; blob < expansions[1] + expansions[3] + 1; blob++)
+                                        {
+                                            endCorner = new Vector2Int(curObjectScript.bounds.max.x + (expansions[0] * xLength) + ((expansions[0] + 1) * clearSpace) + 1, curObjectScript.bounds.min.y + (blob - expansions[3]) * (yLength + clearSpace));
+                                            startCorner = endCorner + offsetDistance;
+
+                                            potentialStartCorners.Add(startCorner);
+                                            potentialEndCorners.Add(endCorner);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        enoughRemaining = false;
+                                    }
+                                }
+                                else if (curDirection == 1)
+                                {
+                                    if (tileCount + expansions[0] + expansions[2] + 1 < totalTiles)
+                                    {
+                                        for (int blob = 0; blob < expansions[0] + expansions[2] + 1; blob++)
+                                        {
+                                            endCorner = new Vector2Int(curObjectScript.bounds.min.x + (blob - expansions[2]) * (xLength + clearSpace), curObjectScript.bounds.max.y + (expansions[1] * yLength) + ((expansions[1] + 1) * clearSpace) + 1);
+                                            startCorner = endCorner + offsetDistance;
+
+                                            potentialStartCorners.Add(startCorner);
+                                            potentialEndCorners.Add(endCorner);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        enoughRemaining = false;
+                                    }
+                                }
+                                else if (curDirection == 2)
+                                {
+                                    if (tileCount + expansions[1] + expansions[3] + 1 < totalTiles)
+                                    {
+                                        for (int blob = 0; blob < expansions[1] + expansions[3] + 1; blob++)
+                                        {
+                                            startCorner = new Vector2Int(curObjectScript.bounds.min.x - (expansions[2] * xLength) - ((expansions[2] + 1) * clearSpace) - 1, curObjectScript.bounds.max.y + (blob - expansions[3]) * (yLength + clearSpace));
+                                            endCorner = startCorner - offsetDistance;
+
+                                            potentialStartCorners.Add(startCorner);
+                                            potentialEndCorners.Add(endCorner);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        enoughRemaining = false;
+                                    }
+                                }
+                                else if (curDirection == 3)
+                                {
+                                    if (tileCount + expansions[0] + expansions[2] + 1 < totalTiles)
+                                    {
+                                        for (int blob = 0; blob < expansions[0] + expansions[2] + 1; blob++)
+                                        {
+                                            startCorner = new Vector2Int(curObjectScript.bounds.max.x + (blob - expansions[2]) * (xLength + clearSpace), curObjectScript.bounds.min.y - (expansions[3] * yLength) - ((expansions[3] + 1) * clearSpace) - 1);
+                                            endCorner = startCorner - offsetDistance;
+
+                                            potentialStartCorners.Add(startCorner);
+                                            potentialEndCorners.Add(endCorner);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        enoughRemaining = false;
+                                    }
+                                }
+
+                                if (CheckBlobsValid(potentialStartCorners, potentialEndCorners, curObjectScript, doors, roomObjects) && enoughRemaining)
+                                {
+                                    AddBlobsToScene(potentialStartCorners, potentialEndCorners, curObject, curObjectScript, buildingParent, roomObjects);
+                                    expansions[curDirection]++;
+                                }
+                                else
+                                {
+                                    tileDirections.Remove(curDirection);
+                                }
+
+                                tileCount = (expansions[0] + expansions[2] + 1) * (expansions[1] + expansions[3] + 1);
+                                if (tileCount >= totalTiles)
+                                {
+                                    break;
+                                }
+
+                            }
+
+                            break;
+                        }
                     }
                 }
             }
         }
+    }
+
+    bool CheckBlobsValid(List<Vector2Int> startCorners, List<Vector2Int> endCorners, RoomObjectScript curObjectScript, List<Door> doors, List<GameObject> gos)
+    {
+        for (int blob = 0; blob < startCorners.Count; blob++)
+        {
+            if (!CheckObjectLocationValid(startCorners[blob], endCorners[blob], curObjectScript, doors, gos))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void AddBlobsToScene(List<Vector2Int> startCorners, List<Vector2Int> endCorners, GameObject curObject, RoomObjectScript curObjectScript, GameObject buildingParent, List<GameObject> gos)
+    {
+
+        for (int blob = 0; blob < startCorners.Count; blob++)
+        {
+            Vector2Int startCorner = startCorners[blob];
+            Vector2Int endCorner = endCorners[blob];
+            float orientationAngle = curObjectScript.orientationAngle;
+            GameObject newObject;
+            if (orientationAngle == 0)
+            {
+                newObject = GameObject.Instantiate(curObject, new Vector3(startCorner.x + 0.5f, startCorner.y + 0.5f, 0), Quaternion.Euler(0,0, orientationAngle * Mathf.Rad2Deg), buildingParent.transform);
+            }
+            else
+            {
+                newObject = GameObject.Instantiate(curObject, new Vector3(endCorner.x + 0.5f, startCorner.y + 0.5f, 0), Quaternion.Euler(0,0, orientationAngle * Mathf.Rad2Deg), buildingParent.transform);
+            }
+            newObject.GetComponent<RoomObjectScript>().AcceptBoundaries(startCorner, endCorner, orientationAngle);
+            if (curObjectScript.isFlippedX)
+            {
+                newObject.GetComponent<RoomObjectScript>().FlipXAxis();
+            }
+            else if (curObjectScript.isFlippedY)
+            {
+                newObject.GetComponent<RoomObjectScript>().FlipYAxis();
+            }
+
+            gos.Add(newObject);
+        }
+
     }
 
     bool CheckObjectLocationValid(Vector2Int startCorner, Vector2Int endCorner, RoomObjectScript roomObjectScript, List<Door> doors, List<GameObject> gos)

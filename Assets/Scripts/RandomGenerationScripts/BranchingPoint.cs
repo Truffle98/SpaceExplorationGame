@@ -9,15 +9,11 @@ public class BranchingPoint
 
     public BoundsInt bounds;
     public Queue<RoomSetup> roomsToMake;
-    public string doorType;
 
-    public BranchingPoint(BoundsInt boundsTemp, Queue<RoomSetup> roomsToMakeTemp, string doorTypeTemp)
+    public BranchingPoint(BoundsInt boundsTemp, Queue<RoomSetup> roomsToMakeTemp)
     {
-
         bounds = boundsTemp;
         roomsToMake = roomsToMakeTemp;
-        doorType = doorTypeTemp;
-
     }
 
 }

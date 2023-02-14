@@ -12,7 +12,7 @@
             "smallRoomsToMakeProbabilities":[],
             "roomObjects":["testCenterObject", "testWallObject"],
             "roomObjectsProbabilities":[100, 100],
-            "roomObjectsCount":[4, 3],
+            "roomObjectsCount":[10, 3],
             "canAddDoors":true
         },
 
