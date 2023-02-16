@@ -1,4 +1,8 @@
 {
+    "startRoom":"testingStartRoom",
+    "startDoor":"wideDouble",
+    "exteriorDoors": 3,
+
     "roomSetups":[
         {
             "roomType":"testingStartRoom",
@@ -13,7 +17,7 @@
             "roomObjects":["testCenterObject", "testWallObject"],
             "roomObjectsProbabilities":[100, 100],
             "roomObjectsCount":[10, 3],
-            "canAddDoors":true
+            "canAddDoors":false
         },
 
         {

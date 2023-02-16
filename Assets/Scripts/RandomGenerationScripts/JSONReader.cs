@@ -6,14 +6,14 @@ using UnityEngine;
 public class TemplateReader
 {
 
-    public Dictionary<string, RoomSetup> ReadBuildingTemplate(string templateName)
+    public BuildingSetup ReadBuildingTemplate(string templateName)
     {
         var json = Resources.Load<TextAsset>("RoomAssets/RoomTemplateDescriptions/" + templateName);
-        RoomTemplateList buildingTemplate = JsonUtility.FromJson<RoomTemplateList>(json.text);
+        BuildingTemplateJSON buildingTemplate = JsonUtility.FromJson<BuildingTemplateJSON>(json.text);
 
         Dictionary<string, RoomSetup> roomSetups = new Dictionary<string, RoomSetup>();
         RoomSetup newSetup;
-        TemplateJSON currentTemplate;
+        RoomTemplateJSON currentTemplate;
 
         for (int i = 0; i < buildingTemplate.roomSetups.Length; i++)
         {
@@ -22,21 +22,24 @@ public class TemplateReader
             newSetup.AcceptJSON(currentTemplate);
             roomSetups.Add(currentTemplate.roomType, newSetup);
         }
-        return roomSetups;
+        
+        BuildingSetup buildingSetup = new BuildingSetup(buildingTemplate.startRoom, buildingTemplate.startDoor, buildingTemplate.exteriorDoors, roomSetups);
+        return buildingSetup;
     }
     
 }
 
 [System.Serializable]
-public class RoomTemplateList
+public class BuildingTemplateJSON
 {
-    public TemplateJSON[] roomSetups;
+    public int exteriorDoors;
+    public string startRoom, startDoor;
+    public RoomTemplateJSON[] roomSetups;
 }
 
 [System.Serializable]
-public class TemplateJSON
+public class RoomTemplateJSON
 {
-
     public string roomType, doorType, floorType;
     public int[] roomMin, roomMax, roomObjectsProbabilities;
     public string[] roomsToMake, smallRoomsToMake;
@@ -44,5 +47,4 @@ public class TemplateJSON
     public string[] roomObjects;
     public int[] roomObjectsCount;
     public bool canAddDoors;
-
 }

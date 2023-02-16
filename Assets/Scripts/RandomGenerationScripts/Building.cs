@@ -9,22 +9,20 @@ public class Building
     private BoundsInt bounds;
     private TileBase tile;
     private string buildingType;
+    private BuildingSetup template;
     private List<Room> rooms = new List<Room>();
     private List<Door> doors = new List<Door>();
-    private Dictionary<string, RoomSetup> roomSetups;
     private GameObject buildingParent;
 
     public Building(BoundsInt boundsTemp, TileBase tileTemp, string typeTemp, GameObject parentTemp)
     {
-
         bounds = boundsTemp;
         tile = tileTemp;
         buildingType = typeTemp;
         buildingParent = parentTemp;
         
         TemplateReader reader = new TemplateReader();
-        roomSetups = reader.ReadBuildingTemplate(buildingType);
-
+        template = reader.ReadBuildingTemplate(buildingType);
     }
 
     public void DrawSelf(Tilemap frontMap, Tilemap backMap)
@@ -60,20 +58,20 @@ public class Building
         //Debug.Log(startDoorOffset);
         //Debug.Log(startDoorLoc);
 
-        doors.Add(new Door(startDoorLoc, startSide, "wideDouble"));
+        doors.Add(new Door(startDoorLoc, startSide, template.startingDoor));
 
         Vector2Int minSize = new Vector2Int(8, 8), maxSize = new Vector2Int(15, 15);
         Vector2Int roomSize = new Vector2Int(Random.Range(minSize.x, maxSize.x + 1), Random.Range(minSize.y, maxSize.y + 1));
         BoundsInt roomLoc = new BoundsInt(new Vector3Int(0,0,0), new Vector3Int(0,0,0));
         List<int> potentialLocations = new List<int>();
 
-        RoomSetup startRoom = roomSetups["testingStartRoom"];
+        RoomSetup startRoom = template.roomSetups[template.startingRoom];
         Room newRoom = GenerateRoomFromDoor(doors[0], startRoom);
         rooms.Add(newRoom);
 
         Queue<BranchingPoint> generationQueue = new Queue<BranchingPoint>();
         Queue<BranchingPoint> finalGenerationQueue = new Queue<BranchingPoint>();
-        generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, startRoom.GenerateRoomSetupQueue(roomSetups)));
+        generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, startRoom.GenerateRoomSetupQueue(template.roomSetups)));
         
         RoomSetup newRoomToMake;
         Door newDoor;
@@ -96,8 +94,8 @@ public class Building
                     {
                         doors.Add(newDoor);
                         rooms.Add(newRoom);
-                        generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newRoomToMake.GenerateRoomSetupQueue(roomSetups)));
-                        finalGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newRoomToMake.GenerateSmallRoomSetupQueue(roomSetups)));
+                        generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newRoomToMake.GenerateRoomSetupQueue(template.roomSetups)));
+                        finalGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newRoomToMake.GenerateSmallRoomSetupQueue(template.roomSetups)));
                     }
                     else
                     {
@@ -193,7 +191,7 @@ public class Building
             }
         }
 
-        int maxExtraExteriorDoors = Mathf.Min(3, potentialExteriorDoors.Count);
+        int maxExtraExteriorDoors = Mathf.Min(template.exteriorDoors, potentialExteriorDoors.Count);
         int randomIdx;
         for (int doorCount = 0; doorCount < maxExtraExteriorDoors; doorCount++)
         {

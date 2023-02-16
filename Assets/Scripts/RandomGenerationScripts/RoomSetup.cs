@@ -26,7 +26,7 @@ public class RoomSetup
 
     }
 
-    public void AcceptJSON(TemplateJSON templateJSON)
+    public void AcceptJSON(RoomTemplateJSON templateJSON)
     {
 
         roomType = templateJSON.roomType;

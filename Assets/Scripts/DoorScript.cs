@@ -7,7 +7,7 @@ public class DoorScript : MonoBehaviour
 
     public Vector2Int location;
     public int orientation, openAngle, closedAngle;
-    private float orientationAngle;
+    private float orientationAngle, remainingTurnAngle = 0, totalTurnAngle = 90;
     private Vector2Int turningPointDirection;
     private Vector3 turningPoint;
     public bool open = false, reversed;
@@ -18,35 +18,41 @@ public class DoorScript : MonoBehaviour
         {
             Interact();
         }
+
+        if (remainingTurnAngle > 0)
+        {
+            if (open)
+            {
+                //Debug.Log("Opening");
+                if (!reversed)
+                {
+                    transform.RotateAround(turningPoint, transform.forward, Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                }
+                else
+                {
+                    transform.RotateAround(turningPoint, transform.forward, -Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                }
+            }
+            else
+            {
+                //Debug.Log("Closing");
+                if (!reversed)
+                {
+                    transform.RotateAround(turningPoint, transform.forward, -Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                }
+                else
+                {
+                    transform.RotateAround(turningPoint, transform.forward, Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                }
+            }
+            remainingTurnAngle -= Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime);
+        }
     }
 
     public void Interact()
     {
-        if (open)
-        {
-            if (reversed)
-            {
-                transform.RotateAround(turningPoint, transform.forward, 90);
-            }
-            else
-            {
-                transform.RotateAround(turningPoint, transform.forward, -90);
-            }
-
-            open = false;
-        }
-        else
-        {
-            if (reversed)
-            {
-                transform.RotateAround(turningPoint, transform.forward, -90);
-            }
-            else
-            {
-                transform.RotateAround(turningPoint, transform.forward, 90);
-            }
-            open = true;
-        }
+        remainingTurnAngle = totalTurnAngle - remainingTurnAngle;
+        open = !open;
     }
 
     public void Setup(Vector2Int locationTemp, int orientationTemp, bool reversedTemp)
