@@ -5,14 +5,16 @@ using UnityEngine;
 public class InventoryController : MonoBehaviour
 {
     [HideInInspector]
-    public ItemGrid inventory, otherInventory;
+    public ItemGrid inventory, otherInventory, activeItems;
     public ItemGrid mainInventory;
-    private InventoryItem selectedItem, overlapItem, itemToMove;
+    [HideInInspector]
+    public InventoryItem selectedItem, overlapItem, itemToMove;
     private bool placed;
     private RectTransform rectTransform;
     [HideInInspector]
     public InventoryHighlight inventoryHighlight;
     public ItemCardHandler itemCard;
+    public GameObject inventoryHandler;
 
     void Update()
     {
@@ -33,8 +35,6 @@ public class InventoryController : MonoBehaviour
         } else if (Input.GetMouseButtonDown(1))
         {
             RightMouseButtonPress();
-        } else if (Input.GetKeyDown(KeyCode.O)) {
-            inventory.Organize();
         }
     }
 
@@ -46,16 +46,39 @@ public class InventoryController : MonoBehaviour
             if (inventory.gameObject.name == "Inventory")
             {
                 itemToMove = mainInventory.PickUpItem(clickPosition.x, clickPosition.y);
-                placed = otherInventory.FindPlaceToPut(itemToMove);
+
+                itemToMove.itemData.width = 1;
+                itemToMove.itemData.height = 1;
+                itemToMove.Set(itemToMove.itemData);
+
+                placed = activeItems.FindPlaceToPutActiveItems(itemToMove);
+                if (!placed)
+                {
+                    placed = mainInventory.FindPlaceToPut(itemToMove);
+                }
             }
             else if (inventory.gameObject.name == "Loot Inventory")
             {
                 itemToMove = otherInventory.PickUpItem(clickPosition.x, clickPosition.y);
                 placed = mainInventory.FindPlaceToPut(itemToMove);
+                if (!placed)
+                {
+                    placed = otherInventory.FindPlaceToPut(itemToMove);
+                }
             }
-            else
+            else if (inventory.gameObject.name == "Active Items")
             {
+                itemToMove = activeItems.PickUpItem(clickPosition.x, clickPosition.y);
 
+                itemToMove.itemData.width = itemToMove.itemData.actualWidth;
+                itemToMove.itemData.height = itemToMove.itemData.actualHeight;
+                itemToMove.Set(itemToMove.itemData);
+
+                placed = mainInventory.FindPlaceToPut(itemToMove);
+                if (!placed)
+                {
+                    placed = activeItems.FindPlaceToPut(itemToMove);
+                }
             }
         }
     }
@@ -65,6 +88,8 @@ public class InventoryController : MonoBehaviour
         Vector2Int positionOnGrid = GetTiledGridPosition();
         if (selectedItem)
         {
+            selectedItem.transform.SetParent(inventoryHandler.transform);
+            selectedItem.transform.SetAsLastSibling();
             itemCard.Show(false);
             inventoryHighlight.Show(true);
             inventoryHighlight.SetSize(selectedItem);
@@ -147,6 +172,17 @@ public class InventoryController : MonoBehaviour
     {
         if (selectedItem)
         {
+            if (inventory && inventory.gameObject.name == "Active Items")
+            {
+                selectedItem.itemData.width = 1;
+                selectedItem.itemData.height = 1;
+                selectedItem.Set(selectedItem.itemData);
+                
+            } else {
+                selectedItem.itemData.width = selectedItem.itemData.actualWidth;
+                selectedItem.itemData.height = selectedItem.itemData.actualHeight;
+                selectedItem.Set(selectedItem.itemData);
+            }
             rectTransform.position = new Vector3(Input.mousePosition.x - selectedItem.itemData.width*32/2, Input.mousePosition.y + selectedItem.itemData.height*32/2, Input.mousePosition.z);
         }
     }

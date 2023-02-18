@@ -12,10 +12,12 @@ public class ItemGrid : MonoBehaviour
     private RectTransform rectTransform;
     private Vector2 positionOnGrid = new Vector2();
     private Vector2Int tilePosition = new Vector2Int();
-    private InventoryItem[,] inventoryItems;
+    [HideInInspector]
+    public InventoryItem[,] inventoryItems;
     public int width = 15, height = 10;
     private InventoryItem overlapItemFake;
-    private List<InventoryItem> actualItems;
+    [HideInInspector]
+    public List<InventoryItem> actualItems;
 
     void Start()
     {
@@ -76,11 +78,48 @@ public class ItemGrid : MonoBehaviour
         {
             actualItems.Add(inventoryItem);
         }
+        inventoryItem.grid = gameObject;
+        return true;
+    }
+
+    public bool PlaceActiveItem(InventoryItem inventoryItem, int xPos, int yPos, int clickX, int clickY, ref InventoryItem overlapItem)
+    {
+        if (!BoundryCheck(xPos, yPos, 1, 1)) { return false; }
+        if (!IntersectionCheck(xPos, yPos, clickX, clickY, 1, 1, ref overlapItem))
+        {
+            overlapItem = null;
+            return false;
+        }
+
+        if (overlapItem) { ClearItem(overlapItem); }
+
+        RectTransform rectTransform = inventoryItem.GetComponent<RectTransform>();
+        rectTransform.SetParent(this.rectTransform);
+
+        inventoryItems[xPos, yPos] = inventoryItem;
+
+        inventoryItem.onGridPositionX = xPos;
+        inventoryItem.onGridPositionY = yPos;
+
+        Vector2 position = new Vector2();
+        position.x = xPos * tileSizeWidth + inventoryItem.itemData.width / 2;
+        position.y = -(yPos * tileSizeHeight + inventoryItem.itemData.height) + 5;
+
+        rectTransform.localPosition = position;
+
+        // will probably need to do something about the items size here so it doesn't just look massive
+        if (!actualItems.Contains(inventoryItem))
+        {
+            actualItems.Add(inventoryItem);
+        }
+        inventoryItem.grid = gameObject;
         return true;
     }
 
     public InventoryItem PickUpItem(int xPos, int yPos)
     {
+        if (xPos < 0 || yPos < 0) { return null; }
+        
         InventoryItem item = inventoryItems[xPos, yPos];
 
         if (!item) { return null; }
@@ -183,8 +222,29 @@ public class ItemGrid : MonoBehaviour
         return false;
     }
 
+    public bool FindPlaceToPutActiveItems(InventoryItem itemToMove)
+    {
+        for (int x = 0; x < this.width; x++)
+        {
+            for (int y = 0; y < this.height; y++)
+            {
+                if (IsSpace(x, y, 1, 1))
+                {
+                    PlaceActiveItem(itemToMove, x, y, x, y, ref overlapItemFake);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private bool IsSpace(int xPos, int yPos, int width, int height)
     {
+        if (xPos + width > this.width || yPos + height > this.height)
+        {
+            return false;
+        }
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
