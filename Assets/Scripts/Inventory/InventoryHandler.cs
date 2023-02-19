@@ -6,7 +6,7 @@ using UnityEngine;
 public class InventoryHandler : MonoBehaviour
 {
     private CircleCollider2D playerCollider;
-    private GameObject inventory, lootInventory, activeItems, inventoryHandler;
+    private GameObject inventory, lootInventory, activeItems, inventoryHandler, activeInventory;
     private InventoryController inventoryController;
     private bool awake, lootAwake, lootable;
     private Loot loot;
@@ -19,6 +19,7 @@ public class InventoryHandler : MonoBehaviour
         inventoryController = GameObject.Find("Player").GetComponent<InventoryController>();
         inventory = GameObject.Find("Inventory");
         activeItems = GameObject.Find("Excess Actions");
+        activeInventory = GameObject.Find("Active Items");
         awake = false;
         inventoryController.activeItems = GameObject.Find("Active Items").GetComponent<ItemGrid>();
         inventoryController.inventoryHandler = inventoryHandler;
@@ -61,7 +62,7 @@ public class InventoryHandler : MonoBehaviour
 
                     foreach (InventoryItem inventoryItem in loot.actualItems)
                     {
-                        if (inventoryItem.grid == inventory) { return; }
+                        if (inventoryItem.grid == inventory || inventoryItem.grid == activeInventory) { return; }
                         RectTransform rectTransform = inventoryItem.GetComponent<RectTransform>();
                         rectTransform.SetParent(lootInventory.GetComponent<RectTransform>());
                         Vector2 position = new Vector2();
