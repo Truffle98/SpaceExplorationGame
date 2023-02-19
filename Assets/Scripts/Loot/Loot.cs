@@ -41,7 +41,7 @@ public class Loot : MonoBehaviour
 
     private bool IsSpace(int xPos, int yPos, int width, int height)
     {
-        if (xPos + width > lootGrid.width-1 || yPos + height > lootGrid.height-1)
+        if (xPos + width > lootGrid.width || yPos + height > lootGrid.height)
         {
             return false;
         }
