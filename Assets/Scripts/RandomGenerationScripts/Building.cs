@@ -6,7 +6,7 @@ using UnityEngine.Tilemaps;
 public class Building
 {
 
-    private BoundsInt bounds;
+    public BoundsInt bounds;
     private TileBase tile;
     private string buildingType;
     private BuildingSetup template;
@@ -58,14 +58,14 @@ public class Building
         //Debug.Log(startDoorOffset);
         //Debug.Log(startDoorLoc);
 
-        doors.Add(new Door(startDoorLoc, startSide, template.startingDoor));
+        doors.Add(new Door(startDoorLoc, startSide, template.startDoor));
 
         Vector2Int minSize = new Vector2Int(8, 8), maxSize = new Vector2Int(15, 15);
         Vector2Int roomSize = new Vector2Int(Random.Range(minSize.x, maxSize.x + 1), Random.Range(minSize.y, maxSize.y + 1));
         BoundsInt roomLoc = new BoundsInt(new Vector3Int(0,0,0), new Vector3Int(0,0,0));
         List<int> potentialLocations = new List<int>();
 
-        RoomSetup startRoom = template.roomSetups[template.startingRoom];
+        RoomSetup startRoom = template.roomSetups[template.startRoom];
         Room newRoom = GenerateRoomFromDoor(doors[0], startRoom);
         rooms.Add(newRoom);
 

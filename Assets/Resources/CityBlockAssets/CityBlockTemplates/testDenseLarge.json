@@ -1,0 +1,25 @@
+{
+    "minBuildings": 2,
+    "potentialBuildings":[
+        
+        {
+            "buildingType":"testLarge",
+            "minSize":[18, 18],
+            "maxSize":[24, 24],
+            "count": 3,
+            "probability":50,
+            "tags":[]
+        },
+
+        {
+            "buildingType":"testMedium",
+            "minSize":[10, 10],
+            "maxSize":[16, 16],
+            "count": 3,
+            "probability":50,
+            "tags":[]
+        }
+    ],
+    "tags":[]
+
+}

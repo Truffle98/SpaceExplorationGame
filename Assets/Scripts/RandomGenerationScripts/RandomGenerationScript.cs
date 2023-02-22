@@ -6,15 +6,10 @@ using UnityEngine.Tilemaps;
 public class RandomGenerationScript : MonoBehaviour
 {
 
-    public int width;
-    public TileBase[] testColors;
-
     //public Vector2Int bottomLeft, topRight;
-    public GameObject buildingPrefab;
+    public string cityType;
     public Tilemap backMap, frontMap;
     public TileBase ground, buildingWall, floor;
-
-    private CityBlock[,] cityMap;
     private int blockLength = 60, roadLength = 15;
     private AstarPath pathfinder;
     private GameObject cityParent;
@@ -46,77 +41,44 @@ public class RandomGenerationScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             ResetCity();
-            DrawCity();
+            GenerateCity(cityType);
         }
     }
 
-    void DrawCity()
+    public void GenerateCity(string cityMapType)
     {
+
+        TemplateReader reader = new TemplateReader();
+        var template = reader.ReadCityMapTemplate(cityMapType);
 
         cityParent = new GameObject("City Parent");
 
-        int totalWidth = width * blockLength + (width + 1) * roadLength;
+        int totalWidth = template.width * blockLength + (template.width + 1) * roadLength;
 
         var bottomLeft = new Vector2Int(-totalWidth / 2, -totalWidth / 2);
         var topRight = new Vector2Int(totalWidth / 2, totalWidth / 2);
-
-        int buildingTypeNum;
-        string buildingType = "";
 
         backMap.SetTile(new Vector3Int(bottomLeft.x, bottomLeft.y, 0), ground);
         backMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), ground);
         backMap.FloodFill(new Vector3Int(0, 0, 0), ground);
 
-        GameObject blockParent;
+        List<Vector2Int> citySectorCenters;
+        citySectorCenters = GenerateCityCenters(template);
 
-        for (int i = 0; i < width; i++)
-        {
-
-            for (int j = 0; j < width; j++)
-            {
-                blockParent = new GameObject("Block Parent " + i + " " + j);
-                blockParent.transform.parent = cityParent.transform;
-
-                if (i != Mathf.Floor(width / 2) || j != Mathf.Floor(width / 2))
-                {
-                    buildingTypeNum = Random.Range(0, 2);
-                    buildingTypeNum = 0;
-                    if (buildingTypeNum == 0)
-                    {
-                        buildingType = "block";
-                    }
-                    else if (buildingTypeNum == 1)
-                    {
-                        buildingType = "empty";
-                    }
-
-                    cityMap[i, j] = new CityBlock(new BoundsInt(new Vector3Int(bottomLeft.x + roadLength * (j + 1) + blockLength * j, bottomLeft.y + roadLength * (i + 1) + blockLength * i, -1),
-                                    new Vector3Int(blockLength, blockLength, 2)), buildingWall, buildingType, blockParent);
-                }
-                else
-                {
-                    cityMap[i, j] = new CityBlock(new BoundsInt(new Vector3Int(bottomLeft.x + roadLength * (j + 1) + blockLength * j, bottomLeft.y + roadLength * (i + 1) + blockLength * i, -1),
-                                    new Vector3Int(blockLength, blockLength, 2)), buildingWall, "empty", blockParent);
-                }
-
-            }
-
-        }
+        CityBlock[,] cityMap = DetermineCityBlocks(template, citySectorCenters);
 
         frontMap.SetTile(new Vector3Int(bottomLeft.x, bottomLeft.y, 0), buildingWall);
         frontMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), buildingWall);
 
-        cityMap[0,0].DrawSelf(frontMap, backMap);
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < template.width; i++)
         {
-
-            for (int j = 0; j < width; j++)
+            for (int j = 0; j < template.width; j++)
             {
-
-                //cityMap[i, j].DrawSelf(frontMap);
-
+                if (cityMap[i, j] != null)
+                {
+                    cityMap[i, j].DrawSelf(frontMap, backMap);
+                }
             }
-
         }
 
         frontMap.SetTile(new Vector3Int(bottomLeft.x, bottomLeft.y, 0), null);
@@ -124,10 +86,175 @@ public class RandomGenerationScript : MonoBehaviour
 
     }
 
+    List<Vector2Int> GenerateCityCenters(CityMapSetup template)
+    {
+        List<Vector2Int> centers = new List<Vector2Int>(), potentialCenters = new List<Vector2Int>();
+        Vector2Int proposedCenter, nullVector = new Vector2Int(-1,-1);
+
+        foreach (CitySectorTemplate citySectorTemplate in template.citySectorTemplates)
+        {
+            potentialCenters.Clear();
+            for (int i = citySectorTemplate.ringCount; i < template.width - citySectorTemplate.ringCount; i++)
+            {
+
+                for (int j = citySectorTemplate.ringCount; j < template.width - citySectorTemplate.ringCount; j++)
+                {
+                    proposedCenter = new Vector2Int(i, j);
+                    if (CheckCenterLocationValid(proposedCenter, citySectorTemplate, centers, template))
+                    {
+                        potentialCenters.Add(proposedCenter);
+                    }
+                }
+
+            }
+            if (potentialCenters.Count > 0)
+            {
+                centers.Add(potentialCenters[Random.Range(0, potentialCenters.Count)]);
+            }
+            else
+            {
+                centers.Add(nullVector);
+            }
+        }
+
+        return centers;
+    }
+
+    bool CheckCenterLocationValid(Vector2Int proposedLocation, CitySectorTemplate curTemplate, List<Vector2Int> centers, CityMapSetup curSetup)
+    {
+        int minDiff;
+        Vector2Int nullVector = new Vector2Int(-1,-1);
+
+        for(int i = 0; i < centers.Count; i++)
+        {
+            if (centers[i] == nullVector)
+            {
+                continue;
+            }
+            minDiff = Mathf.Min(Mathf.Abs(centers[i].x - proposedLocation.x), Mathf.Abs(centers[i].y - proposedLocation.y));
+            
+            if (minDiff <= curTemplate.ringCount + curSetup.citySectorTemplates[i].ringCount - 2)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    CityBlock[,] DetermineCityBlocks(CityMapSetup template, List<Vector2Int> centers)
+    {
+        CityBlock[,] cityMap = GenerateEmptyMap(template.width);
+        List<Vector2Int> curBlockLocations = new List<Vector2Int>();
+        Vector2Int curLocation, curDirection, chosenLocation;
+        float curDirectionAngle;
+        int totalBlocks, chosenLocationIdx, templateIdx;
+        List<string> potentialTemplates = new List<string>();
+        string chosenTemplate;
+        List<int> templateCounts = new List<int>(), templateLimits = new List<int>();
+
+        int totalWidth = template.width * blockLength + (template.width + 1) * roadLength;
+
+        var bottomLeft = new Vector2Int(-totalWidth / 2, -totalWidth / 2);
+        var topRight = new Vector2Int(totalWidth / 2, totalWidth / 2);
+
+        GameObject blockParent;
+
+        Vector2Int nullVector = new Vector2Int(-1,-1);
+        for (int centerIdx = 0; centerIdx < centers.Count; centerIdx++)
+        {
+            if (centers[centerIdx] == nullVector)
+            {
+                continue;
+            }
+            for (int ringIdx = 0; ringIdx < template.citySectorTemplates[centerIdx].ringCount; ringIdx++)
+            {
+                curBlockLocations.Clear();
+                if (ringIdx == 0)
+                {
+                    curBlockLocations.Add(centers[centerIdx]);
+                }
+                else
+                {
+                    curLocation = new Vector2Int(centers[centerIdx].x + ringIdx, centers[centerIdx].y - ringIdx);
+                    curDirectionAngle = (Mathf.PI / 2f);
+                    for (int i = 0; i < 4; i++)
+                    {
+                        curDirection = new Vector2Int((int)Mathf.Round(Mathf.Cos(curDirectionAngle) / 0.707f), (int)Mathf.Round(Mathf.Sin(curDirectionAngle) / 0.707f));
+                        for (int j = 0; j < ringIdx * 2; j++)
+                        {
+                            curLocation += curDirection;
+                            curBlockLocations.Add(curLocation);
+                        }
+                        curDirectionAngle += (Mathf.PI / 2f);
+                    }
+                }
+
+                potentialTemplates.Clear();
+                templateCounts.Clear();
+                templateLimits.Clear();
+
+                for (int i = 0; i < template.citySectorTemplates[centerIdx].ringTemplates[ringIdx].Count; i++)
+                {
+                    potentialTemplates.Add(template.citySectorTemplates[centerIdx].ringTemplates[ringIdx][i]);
+                    templateCounts.Add(0);
+                    templateLimits.Add(template.citySectorTemplates[centerIdx].ringTemplateLimits[ringIdx][i]);
+                }
+
+                totalBlocks = curBlockLocations.Count;
+                for (int i = 0; i < totalBlocks; i++)
+                {
+                    chosenLocationIdx = Random.Range(0, curBlockLocations.Count);
+                    chosenLocation = curBlockLocations[chosenLocationIdx];
+                    templateIdx = Random.Range(0, potentialTemplates.Count);
+                    chosenTemplate = potentialTemplates[templateIdx];
+
+                    if (chosenTemplate != "empty")
+                    {
+                        blockParent = new GameObject("Block Parent " + chosenLocation.x + " " + chosenLocation.y);
+                        blockParent.transform.parent = cityParent.transform;
+
+                        cityMap[chosenLocation.x, chosenLocation.y] = new CityBlock(new BoundsInt(new Vector3Int(bottomLeft.x + roadLength * (chosenLocation.y + 1) + blockLength * chosenLocation.y,
+                                                                                    bottomLeft.y + roadLength * (chosenLocation.x + 1) + blockLength * chosenLocation.x, 0),
+                                                                                    new Vector3Int(blockLength, blockLength, 0)), buildingWall, chosenTemplate, blockParent);
+                    }
+
+                    curBlockLocations.RemoveAt(chosenLocationIdx);
+                    templateCounts[templateIdx]++;
+                    if (templateCounts[templateIdx] >= templateLimits[templateIdx])
+                    {
+                        potentialTemplates.RemoveAt(templateIdx);
+                        templateCounts.RemoveAt(templateIdx);
+                        templateLimits.RemoveAt(templateIdx);
+
+                        if (potentialTemplates.Count == 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        return cityMap;
+    }
+
+    CityBlock[,] GenerateEmptyMap(int width)
+    {
+        CityBlock[,] cityMap = new CityBlock[width, width];
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                cityMap[i,j] = null;
+            }
+        }
+        return cityMap;
+    }
+
     public void ResetCity()
     {
         Destroy(cityParent);
-        cityMap = new CityBlock[width, width];
         frontMap.ClearAllTiles();
         backMap.ClearAllTiles();
     }

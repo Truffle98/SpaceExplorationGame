@@ -19,16 +19,8 @@ public class RoomSetup
     public int[] roomObjectsProbabilities, roomObjectsCount;
     public bool canAddDoors;
 
-    public RoomSetup()
-    {
-
-
-
-    }
-
     public void AcceptJSON(RoomTemplateJSON templateJSON)
     {
-
         roomType = templateJSON.roomType;
         doorType = templateJSON.doorType;
         floorType = templateJSON.floorType;
@@ -61,7 +53,16 @@ public class RoomSetup
             roomObjectsCount[i] = templateJSON.roomObjectsCount[i];
         }
 
-        canAddDoors = templateJSON.canAddDoors;
+        //Set defaults
+        canAddDoors = true;
+
+        foreach (string tag in templateJSON.tags)
+        {
+            if (tag == "noExtraDoors")
+            {
+                canAddDoors = false;
+            }
+        }
     }
 
     public Queue<RoomSetup> GenerateRoomSetupQueue(Dictionary<string, RoomSetup> roomSetups)

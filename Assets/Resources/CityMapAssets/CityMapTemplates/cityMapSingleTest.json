@@ -1,0 +1,21 @@
+{
+
+    "width": 9,
+    "citySectorTemplates":[
+        {
+            "ringCount": 1,
+            "rings":[
+                {
+                    "templates":["testBlock"],
+                    "limits":[1]
+                }
+            ],
+            "tags":[]
+        }
+
+    ],
+
+    "ensureSpawn":[],
+    "tags":[]
+
+}

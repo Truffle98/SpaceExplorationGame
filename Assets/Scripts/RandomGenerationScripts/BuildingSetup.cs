@@ -5,16 +5,18 @@ using UnityEngine.Tilemaps;
 
 public class BuildingSetup
 {
-    public string startingRoom, startingDoor;
+    public string buildingType;
+    public string startRoom, startDoor;
     public int exteriorDoors;
     public Dictionary<string, RoomSetup> roomSetups;
 
-    public BuildingSetup(string startingRoomTemp, string startingDoorTemp, int exteriorDoorsTemp, Dictionary<string, RoomSetup> roomSetupsTemp)
+    public void AcceptJSON(BuildingSetupJSON templateJSON, Dictionary<string, RoomSetup> roomSetupsTemp)
     {
-        startingRoom = startingRoomTemp;
-        startingDoor = startingDoorTemp;
-        exteriorDoors = exteriorDoorsTemp;
         roomSetups = roomSetupsTemp;
+
+        startRoom = templateJSON.startRoom;
+        startDoor = templateJSON.startDoor;
+        exteriorDoors = templateJSON.exteriorDoors;
     }
 
 }

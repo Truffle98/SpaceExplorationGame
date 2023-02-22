@@ -14,10 +14,10 @@ public class DoorScript : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            Interact();
-        }
+        // if (Input.GetKeyDown(KeyCode.K))
+        // {
+        //     Interact();
+        // }
 
         if (remainingTurnAngle > 0)
         {
