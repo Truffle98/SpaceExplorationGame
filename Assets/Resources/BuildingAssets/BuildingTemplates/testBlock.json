@@ -10,6 +10,8 @@
             "floorType":"testFloor",
             "roomMin":[10, 10],
             "roomMax":[16, 16],
+            "priorityRoomsToMake":["priorityRoom1"],
+            "priorityRoomsToMakeProbabilities":[100],
             "roomsToMake":["testingRoom", "testingRoom", "testingRoom", "testingRoom"],
             "roomsToMakeProbabilities":[100, 75, 50, 25],
             "smallRoomsToMake":[],
@@ -26,6 +28,8 @@
             "floorType":"testFloor",
             "roomMin":[6, 6],
             "roomMax":[10, 10],
+            "priorityRoomsToMake":[],
+            "priorityRoomsToMakeProbabilities":[],
             "roomsToMake":["testingRoom", "testingRoom"],
             "roomsToMakeProbabilities":[100, 50],
             "smallRoomsToMake":["smallTestingRoom"],
@@ -42,6 +46,8 @@
             "floorType":"testFloor",
             "roomMin":[4, 4],
             "roomMax":[6, 6],
+            "priorityRoomsToMake":[],
+            "priorityRoomsToMakeProbabilities":[],
             "roomsToMake":[],
             "roomsToMakeProbabilities":[],
             "smallRoomsToMake":[],
@@ -50,6 +56,60 @@
             "roomObjectsProbabilities":[],
             "roomObjectsCount":[],
             "tags":[]
+        },
+
+        {
+            "roomType":"priorityRoom1",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[8, 8],
+            "roomMax":[12, 12],
+            "priorityRoomsToMake":["priorityRoom2"],
+            "priorityRoomsToMakeProbabilities":[100],
+            "roomsToMake":[],
+            "roomsToMakeProbabilities":[],
+            "smallRoomsToMake":["smallTestingRoom"],
+            "smallRoomsToMakeProbabilities":[50],
+            "roomObjects":[],
+            "roomObjectsProbabilities":[],
+            "roomObjectsCount":[],
+            "tags":[]
+        },
+
+        {
+            "roomType":"priorityRoom2",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[5, 5],
+            "roomMax":[8, 8],
+            "priorityRoomsToMake":["priorityRoomEnd"],
+            "priorityRoomsToMakeProbabilities":[100],
+            "roomsToMake":[],
+            "roomsToMakeProbabilities":[],
+            "smallRoomsToMake":["smallTestingRoom", "smallTestingRoom"],
+            "smallRoomsToMakeProbabilities":[100, 50],
+            "roomObjects":[],
+            "roomObjectsProbabilities":[],
+            "roomObjectsCount":[],
+            "tags":[]
+        },
+
+        {
+            "roomType":"priorityRoomEnd",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[12, 12],
+            "roomMax":[16, 16],
+            "priorityRoomsToMake":[],
+            "priorityRoomsToMakeProbabilities":[],
+            "roomsToMake":[],
+            "roomsToMakeProbabilities":[],
+            "smallRoomsToMake":[],
+            "smallRoomsToMakeProbabilities":[],
+            "roomObjects":["testWallObject", "testCenterObject"],
+            "roomObjectsProbabilities":[50, 75],
+            "roomObjectsCount":[3, 4],
+            "tags":["noExtraDoors"]
         }
     ]
 }

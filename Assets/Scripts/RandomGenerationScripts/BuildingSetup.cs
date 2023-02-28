@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+//Holds info for a Building to generate it's layout
 public class BuildingSetup
 {
     public string buildingType;

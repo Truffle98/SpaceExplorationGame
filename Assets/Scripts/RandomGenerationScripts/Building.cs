@@ -2,7 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Linq;
 
+//Holds info about a building, such as it's bounds and rooms
+//Has functions to generate all the rooms and doors in the building
 public class Building
 {
 
@@ -69,18 +72,49 @@ public class Building
         Room newRoom = GenerateRoomFromDoor(doors[0], startRoom);
         rooms.Add(newRoom);
 
+        Queue<BranchingPoint> priortiyGenerationQueue = new Queue<BranchingPoint>();
         Queue<BranchingPoint> generationQueue = new Queue<BranchingPoint>();
         Queue<BranchingPoint> finalGenerationQueue = new Queue<BranchingPoint>();
-        generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, startRoom.GenerateRoomSetupQueue(template.roomSetups)));
+        Queue<RoomSetup> newQueue;
+
+        newQueue = startRoom.GeneratePriorityRoomSetupQueue(template.roomSetups);
+        if (newQueue.Count > 0)
+        {
+            priortiyGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+        }
+
+        newQueue = startRoom.GenerateRoomSetupQueue(template.roomSetups);
+        if (newQueue.Count > 0)
+        {
+            generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+        }
+
+        newQueue = startRoom.GenerateSmallRoomSetupQueue(template.roomSetups);
+        if (newQueue.Count > 0)
+        {
+            finalGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+        }
         
         RoomSetup newRoomToMake;
         Door newDoor;
         BranchingPoint curBranchingPoint;
         bool endGeneration = false;
 
-        while (generationQueue.Count > 0)
+        while (generationQueue.Count > 0 || priortiyGenerationQueue.Count > 0 || finalGenerationQueue.Count > 0)
         {
-            curBranchingPoint = generationQueue.Dequeue();
+            if (priortiyGenerationQueue.Count > 0)
+            {
+                curBranchingPoint = priortiyGenerationQueue.Dequeue();
+            }
+            else if (generationQueue.Count > 0)
+            {
+                curBranchingPoint = generationQueue.Dequeue();
+            }
+            else
+            {
+                curBranchingPoint = finalGenerationQueue.Dequeue();
+            }
+            
             while (curBranchingPoint.roomsToMake.Count > 0)
             {
                 newRoomToMake = curBranchingPoint.roomsToMake.Dequeue();
@@ -94,44 +128,24 @@ public class Building
                     {
                         doors.Add(newDoor);
                         rooms.Add(newRoom);
-                        generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newRoomToMake.GenerateRoomSetupQueue(template.roomSetups)));
-                        finalGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newRoomToMake.GenerateSmallRoomSetupQueue(template.roomSetups)));
-                    }
-                    else
-                    {
-                        Debug.Log("Error in room generation");
-                        endGeneration = true;
-                        break;
-                    }
-                }
-                else
-                {
-                    //Debug.Log("Couldn't make room");
-                    continue;
-                }
-            }
-            if (endGeneration)
-            {
-                break;
-            }
-        }
 
-        while (finalGenerationQueue.Count > 0)
-        {
-            curBranchingPoint = finalGenerationQueue.Dequeue();
-            while (curBranchingPoint.roomsToMake.Count > 0)
-            {
-                newRoomToMake = curBranchingPoint.roomsToMake.Dequeue();
-                
-                newDoor = GenerateDoorLocation(curBranchingPoint, newRoomToMake);
-                if (newDoor != null)
-                {
-                    
-                    newRoom = GenerateRoomFromDoor(newDoor, newRoomToMake);
-                    if (newRoom != null)
-                    {
-                        doors.Add(newDoor);
-                        rooms.Add(newRoom);
+                        newQueue = newRoomToMake.GeneratePriorityRoomSetupQueue(template.roomSetups);
+                        if (newQueue.Count > 0)
+                        {
+                            priortiyGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+                        }
+
+                        newQueue = newRoomToMake.GenerateRoomSetupQueue(template.roomSetups);
+                        if (newQueue.Count > 0)
+                        {
+                            generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+                        }
+
+                        newQueue = newRoomToMake.GenerateSmallRoomSetupQueue(template.roomSetups);
+                        if (newQueue.Count > 0)
+                        {
+                            finalGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+                        }
                     }
                     else
                     {
@@ -155,14 +169,14 @@ public class Building
         foreach(Room room1 in rooms)
         {
 
-            if (!room1.template.canAddDoors)
+            if (room1.template.tags.Contains("noExtraDoors"))
             {
                 continue;
             }
 
             foreach(Room room2 in rooms)
             {
-                if (!room2.template.canAddDoors || room1 == room2)
+                if (room2.template.tags.Contains("noExtraDoors") || room1 == room2)
                 {
                     continue;
                 }
@@ -181,7 +195,7 @@ public class Building
 
         foreach(Room room in rooms)
         {
-            if (room.template.canAddDoors)
+            if (!room.template.tags.Contains("noExtraDoors"))
             {
                 potentialDoor = GenerateExteriorDoor(room);
                 if (potentialDoor != null)

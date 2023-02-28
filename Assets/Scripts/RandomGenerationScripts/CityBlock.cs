@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+//Contains info for a City Block, such as its bounds, buildings, and type
+//Has functions to generate it's buildings
 public class CityBlock
 {
-
     public BoundsInt bounds;
     public string blockType;
     private TileBase tile;

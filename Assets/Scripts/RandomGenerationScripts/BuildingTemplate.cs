@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+//Used in conjunction with a CityBlockSetup to generate the buildings in a city block
 public class BuildingTemplate
 {
-
     public string buildingType;
     public Vector2Int minSize, maxSize;
     public int count, probability;

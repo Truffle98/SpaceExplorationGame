@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+//Contains info to generate the buildings inside a CityBlock
 public class CityBlockSetup
 {
     public int minBuildings;

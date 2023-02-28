@@ -95,8 +95,8 @@ public class CitySectorTemplateJSON
 [System.Serializable]
 public class RingJSON
 {
-    public string[] templates;
-    public int[] limits;
+    public string[] templates, priorityTemplates;
+    public int[] limits, priorityLimits;
 }
 
 [System.Serializable]
@@ -131,8 +131,8 @@ public class RoomTemplateJSON
 {
     public string roomType, doorType, floorType;
     public int[] roomMin, roomMax, roomObjectsProbabilities;
-    public string[] roomsToMake, smallRoomsToMake;
-    public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities;
+    public string[] roomsToMake, smallRoomsToMake, priorityRoomsToMake;
+    public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities, priorityRoomsToMakeProbabilities;
     public string[] roomObjects;
     public int[] roomObjectsCount;
     public string[] tags;

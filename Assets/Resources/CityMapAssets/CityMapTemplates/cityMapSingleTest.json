@@ -6,6 +6,8 @@
             "ringCount": 1,
             "rings":[
                 {
+                    "priorityTemplates":[],
+                    "priorityLimits":[],
                     "templates":["testBlock"],
                     "limits":[1]
                 }
@@ -15,7 +17,7 @@
 
     ],
 
-    "ensureSpawn":[],
+    "ensureSpawn":["testCenterObject"],
     "tags":[]
 
 }

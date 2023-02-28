@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-//Holds info about a room in a building
+//Holds info about a room in a building such as its bounds and the template it came from
+//Has functions to generate the furniture inside
 public class Room
 {
 

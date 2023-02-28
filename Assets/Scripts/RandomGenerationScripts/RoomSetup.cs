@@ -13,11 +13,11 @@ public class RoomSetup
 
     public Vector2Int minSize, maxSize;
     public string roomType, doorType, floorType;
-    public string[] roomsToMake, smallRoomsToMake;
-    public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities;
+    public string[] roomsToMake, smallRoomsToMake, priorityRoomsToMake;
+    public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities, priorityRoomsToMakeProbabilities;
     public string[] roomObjects;
     public int[] roomObjectsProbabilities, roomObjectsCount;
-    public bool canAddDoors;
+    public string[] tags;
 
     public void AcceptJSON(RoomTemplateJSON templateJSON)
     {
@@ -27,6 +27,14 @@ public class RoomSetup
         minSize = new Vector2Int(templateJSON.roomMin[0], templateJSON.roomMin[1]);
         maxSize = new Vector2Int(templateJSON.roomMax[0], templateJSON.roomMax[1]);
         
+        priorityRoomsToMake = new string[templateJSON.priorityRoomsToMake.Length];
+        priorityRoomsToMakeProbabilities = new int[templateJSON.priorityRoomsToMake.Length];
+        for (int i = 0; i < templateJSON.priorityRoomsToMake.Length; i++)
+        {
+            priorityRoomsToMake[i] = templateJSON.priorityRoomsToMake[i];
+            priorityRoomsToMakeProbabilities[i] = templateJSON.priorityRoomsToMakeProbabilities[i];
+        }
+
         roomsToMake = new string[templateJSON.roomsToMake.Length];
         roomsToMakeProbabilities = new int[templateJSON.roomsToMake.Length];
         for (int i = 0; i < templateJSON.roomsToMake.Length; i++)
@@ -53,16 +61,26 @@ public class RoomSetup
             roomObjectsCount[i] = templateJSON.roomObjectsCount[i];
         }
 
-        //Set defaults
-        canAddDoors = true;
-
-        foreach (string tag in templateJSON.tags)
+        tags = new string[templateJSON.tags.Length];
+        for (int i = 0; i < templateJSON.tags.Length; i++)
         {
-            if (tag == "noExtraDoors")
+            tags[i] = templateJSON.tags[i];
+        }
+    }
+
+    public Queue<RoomSetup> GeneratePriorityRoomSetupQueue(Dictionary<string, RoomSetup> roomSetups)
+    {
+        Queue<RoomSetup> roomQueue = new Queue<RoomSetup>();
+
+        for(int i = 0; i < priorityRoomsToMake.Length; i++)
+        {
+            if (Random.Range(0, 100) < priorityRoomsToMakeProbabilities[i])
             {
-                canAddDoors = false;
+                roomQueue.Enqueue(roomSetups[priorityRoomsToMake[i]]);
             }
         }
+
+        return roomQueue;
     }
 
     public Queue<RoomSetup> GenerateRoomSetupQueue(Dictionary<string, RoomSetup> roomSetups)
