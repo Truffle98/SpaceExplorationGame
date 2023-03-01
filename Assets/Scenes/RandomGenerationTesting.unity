@@ -106,7 +106,7 @@ NavMeshSettings:
   m_BuildSettings:
     serializedVersion: 2
     agentTypeID: 0
-    agentRadius: 0.5
+    agentRadius: 0.35
     agentHeight: 2
     agentSlope: 45
     agentClimb: 0.4
@@ -114,7 +114,7 @@ NavMeshSettings:
     maxJumpAcrossDistance: 0
     minRegionArea: 2
     manualCellSize: 0
-    cellSize: 0.16666667
+    cellSize: 0.11666667
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
@@ -506,7 +506,6 @@ GameObject:
   - component: {fileID: 415412489}
   - component: {fileID: 415412490}
   - component: {fileID: 415412492}
-  - component: {fileID: 415412491}
   m_Layer: 0
   m_Name: Agent
   m_TagString: Untagged
@@ -555,8 +554,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 3da89c4567ec8c3468947eb8c841fb5a, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -575,7 +574,7 @@ Transform:
   m_GameObject: {fileID: 415412485}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 14.35, y: -0.29, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -591,10 +590,10 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 8
-  m_Acceleration: 8
+  m_Speed: 2
+  m_Acceleration: 16
   avoidancePriority: 50
-  m_AngularSpeed: 120
+  m_AngularSpeed: 240
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
@@ -615,27 +614,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f06bc87959e819d4d95bde6b2b57530f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!50 &415412491
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 415412485}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!58 &415412492
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -1663,7 +1641,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 30
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1886,7 +1864,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 631611964}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.69, y: -2.27, z: 0}
+  m_LocalPosition: {x: 12.41, y: 7.57, z: 0}
   m_LocalScale: {x: 0.75, y: 0.75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2148,7 +2126,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.083333336
+  m_VoxelSize: 0.11666667
   m_BuildHeightMesh: 0
   m_HideEditorLogs: 0
   m_NavMeshData: {fileID: 23800000, guid: e87095bd2002b8d49af3f7310fa3c9a5, type: 2}
@@ -2297,8 +2275,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 4445767626100458129, guid: 050601ecfecb493429b435d0df1ff411, type: 3}
+      propertyPath: reversed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4445767626100458129, guid: 050601ecfecb493429b435d0df1ff411, type: 3}
       propertyPath: openAngle
-      value: 180
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4445767626100458129, guid: 050601ecfecb493429b435d0df1ff411, type: 3}
       propertyPath: location.x
@@ -2311,6 +2293,14 @@ PrefabInstance:
     - target: {fileID: 4445767626100458129, guid: 050601ecfecb493429b435d0df1ff411, type: 3}
       propertyPath: closedAngle
       value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4445767626100458129, guid: 050601ecfecb493429b435d0df1ff411, type: 3}
+      propertyPath: turningPoint.x
+      value: 11.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 4445767626100458129, guid: 050601ecfecb493429b435d0df1ff411, type: 3}
+      propertyPath: turningPoint.y
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4445767626100458130, guid: 050601ecfecb493429b435d0df1ff411, type: 3}
       propertyPath: m_Name

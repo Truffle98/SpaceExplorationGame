@@ -7,10 +7,12 @@ public class DoorScript : MonoBehaviour
 
     public Vector2Int location;
     public int orientation, openAngle, closedAngle;
-    private float orientationAngle, remainingTurnAngle = 0, totalTurnAngle = 90;
+    private float orientationAngle, remainingTurnAngle = 0, totalTurnAngle = 90, lockDuration;
     private Vector2Int turningPointDirection;
-    private Vector3 turningPoint;
-    public bool open = false, reversed;
+    public Vector3 turningPoint;
+    public bool reversed;
+    [HideInInspector]
+    public bool inUse = false, open = false;
 
     void Update()
     {
@@ -18,41 +20,54 @@ public class DoorScript : MonoBehaviour
         // {
         //     Interact();
         // }
-
-        if (remainingTurnAngle > 0)
+        if (lockDuration <= 0)
         {
-            if (open)
+            if (remainingTurnAngle > 0)
             {
-                //Debug.Log("Opening");
-                if (!reversed)
+                if (open)
                 {
-                    transform.RotateAround(turningPoint, transform.forward, Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                    //Debug.Log("Opening");
+                    if (!reversed)
+                    {
+                        transform.RotateAround(turningPoint, transform.forward, Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                    }
+                    else
+                    {
+                        transform.RotateAround(turningPoint, transform.forward, -Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                    }
                 }
                 else
                 {
-                    transform.RotateAround(turningPoint, transform.forward, -Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                    //Debug.Log("Closing");
+                    if (!reversed)
+                    {
+                        transform.RotateAround(turningPoint, transform.forward, -Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                    }
+                    else
+                    {
+                        transform.RotateAround(turningPoint, transform.forward, Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
+                    }
                 }
+                remainingTurnAngle -= Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime);
             }
-            else
+            else if (inUse)
             {
-                //Debug.Log("Closing");
-                if (!reversed)
-                {
-                    transform.RotateAround(turningPoint, transform.forward, -Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
-                }
-                else
-                {
-                    transform.RotateAround(turningPoint, transform.forward, Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime));
-                }
+                inUse = false;
             }
-            remainingTurnAngle -= Mathf.Min(remainingTurnAngle, 90f * Time.deltaTime);
+        }
+        else
+        {
+            lockDuration -= Time.deltaTime;
         }
     }
 
     public void Interact()
     {
-        remainingTurnAngle = totalTurnAngle - remainingTurnAngle;
-        open = !open;
+        if (!inUse)
+        {
+            remainingTurnAngle = totalTurnAngle - remainingTurnAngle;
+            open = !open;
+        }
     }
 
     public void Setup(Vector2Int locationTemp, int orientationTemp, bool reversedTemp)
@@ -75,6 +90,20 @@ public class DoorScript : MonoBehaviour
 
         transform.position = new Vector3(location.x + 0.5f - Mathf.Cos(orientationAngle) * 0.45f, location.y + 0.5f - Mathf.Sin(orientationAngle) * 0.45f, 0);
         transform.Rotate(0,0, (orientationAngle + Mathf.PI / 2) * Mathf.Rad2Deg);
+    }
+
+    public bool IsOpening()
+    {
+        if (remainingTurnAngle > 0 && open)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void SetLockDuration(float duration)
+    {
+        lockDuration = duration;
     }
 
 }
