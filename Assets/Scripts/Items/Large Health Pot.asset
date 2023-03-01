@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92bf2d14c0bc7ad419f4d86a87b28106, type: 3}
   m_Name: Large Health Pot
   m_EditorClassIdentifier: 
-  width: 3
-  height: 2
-  actualWidth: 3
-  actualHeight: 2
+  width: 5
+  height: 4
+  actualWidth: 5
+  actualHeight: 4
   itemName: Large Health Pot
   itemIcon: {fileID: 21300000, guid: 5fd00bc61626aee4da534fbe7abcde78, type: 3}
