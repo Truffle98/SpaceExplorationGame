@@ -42,6 +42,7 @@ public class PlayerScript : MonoBehaviour
         RaycastVision();
         MovePlayer();
         //MoveCamera();
+        CheckInteract();
         cam.transform.position = transform.position - new Vector3(0,0,10);
     }
 
@@ -108,7 +109,8 @@ public class PlayerScript : MonoBehaviour
                     if (hit.collider.tag == "Wall")
                     {
                         break;
-                    } else if (hit.collider.tag == "NeedsLOS")
+                    } 
+                    else if (hit.collider.tag == "NeedsLOS")
                     {
                         var vs = hit.collider.gameObject.GetComponent<VisibilityScript>();
                         if (vs.isVisible)
@@ -164,6 +166,29 @@ public class PlayerScript : MonoBehaviour
         foreach (GameObject go in inVision)
         {
             oldInVision.Add(go);
+        }
+    }
+
+    void CheckInteract()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            //Debug.Log("Checking door");
+            var rayDirection = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+            RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, rayDirection, 1.5f);
+
+            foreach (RaycastHit2D hit in hits)
+            {
+                if (hit.collider.tag == "Wall")
+                {
+                    break;
+                }
+                else if (hit.collider.tag == "Door")
+                {
+                    //Debug.Log("FOUND DOOR");
+                    hit.collider.gameObject.GetComponent<DoorScript>().Interact();
+                }
+            }
         }
     }
 

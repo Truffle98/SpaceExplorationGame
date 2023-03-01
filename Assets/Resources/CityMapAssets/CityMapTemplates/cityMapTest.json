@@ -1,0 +1,50 @@
+{
+
+    "width": 11,
+    "citySectorTemplates":[
+        {
+            "ringCount": 2,
+            "rings":[
+                {
+                    "priorityTemplates":[],
+                    "priorityLimits":[],
+                    "templates":["testBlock"],
+                    "limits":[1]
+                },
+
+                {
+                    "priorityTemplates":["testBlock"],
+                    "priorityLimits":[1],
+                    "templates":["testDenseLarge", "testDenseSmall", "empty"],
+                    "limits":[4, 8, 4]
+                }
+            ],
+            "tags":["needsSpace"]
+        },
+
+        {
+            "ringCount": 2,
+            "rings":[
+                {
+                    "priorityTemplates":[],
+                    "priorityLimits":[],
+                    "templates":["testBlock"],
+                    "limits":[1]
+                },
+
+                {
+                    "priorityTemplates":["testBlock"],
+                    "priorityLimits":[1],
+                    "templates":["testDenseLarge", "testDenseSmall", "empty"],
+                    "limits":[4, 8, 4]
+                }
+            ],
+            "tags":["prioritizeNear"]
+        }
+
+    ],
+
+    "ensureSpawn":[],
+    "tags":[]
+
+}

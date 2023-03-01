@@ -1,0 +1,15 @@
+{
+    "minBuildings": 1,
+    "potentialBuildings":[
+        {
+            "buildingType":"testBlock",
+            "minSize":[60, 60],
+            "maxSize":[60, 60],
+            "count": 1,
+            "probability":100,
+            "tags":[]
+        }
+    ],
+    "tags":[]
+
+}

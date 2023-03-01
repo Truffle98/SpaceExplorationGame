@@ -11,35 +11,54 @@ public class Door
     public string doorType;
     public int orientation;
     public float orientationAngle;
+    public GameObject doorObject, doorObject2;
 
     public Door(Vector2Int locationTemp, int orientationTemp, string typeTemp)
     {
-
         location = locationTemp;
         orientation = orientationTemp;
         orientationAngle = orientation * (Mathf.PI / 2f);
         doorType = typeTemp;
-
     }
 
-    public void DrawSelf(Tilemap frontMap, Tilemap backMap)
+    public void DrawSelf(Tilemap frontMap, Tilemap backMap, GameObject buildingParent)
     {
         
         Vector2Int cornerOne = new Vector2Int(0,0), cornerTwo = new Vector2Int(0,0);
+        GameObject doorAsset = Resources.Load<GameObject>("RoomAssets/RoomObjects/door");
 
         if (doorType == "single")
         {
-
             cornerOne = new Vector2Int(location.x, location.y);
             cornerTwo = new Vector2Int(location.x, location.y);
 
+            doorObject = GameObject.Instantiate(doorAsset, buildingParent.transform);
+            doorObject.GetComponent<DoorScript>().Setup(location, orientation, false);
         }
 
         else if (doorType == "wideDouble")
         {
             cornerOne = new Vector2Int(location.x, location.y);
             cornerTwo = new Vector2Int((int)Mathf.Round(location.x + Mathf.Cos(orientationAngle - Mathf.PI * 0.75f) * Mathf.Sqrt(2f)), (int)Mathf.Round(location.y + Mathf.Sin(orientationAngle - Mathf.PI / 0.75f) * Mathf.Sqrt(2f)));
-        
+
+            bool reversed = false;
+            if (orientation == 0 || orientation == 2)
+            {
+                reversed = true;
+            }
+
+            doorObject = GameObject.Instantiate(doorAsset, buildingParent.transform);
+            doorObject.GetComponent<DoorScript>().Setup(location, orientation, reversed);
+            doorObject2 = GameObject.Instantiate(doorAsset, buildingParent.transform);
+            doorObject2.GetComponent<DoorScript>().Setup(location + new Vector2Int((int)Mathf.Round(-Mathf.Cos(orientationAngle + Mathf.PI / 2)), (int)Mathf.Round(Mathf.Sin(orientationAngle + Mathf.PI / 2))), orientation, !reversed);
+        }
+
+        else if (doorType == "longSingle")
+        {
+            cornerOne = new Vector2Int(location.x, location.y);
+            cornerTwo = new Vector2Int((int)Mathf.Round(location.x + Mathf.Cos(orientationAngle) * 3), (int)Mathf.Round(location.y + Mathf.Sin(orientationAngle) * 3));
+            doorObject = GameObject.Instantiate(doorAsset, buildingParent.transform);
+            doorObject.GetComponent<DoorScript>().Setup(location, orientation, false);
         }
 
         Vector2Int bottomLeft = new Vector2Int(Mathf.Min(cornerOne.x, cornerTwo.x), Mathf.Min(cornerOne.y, cornerTwo.y)), topRight = new Vector2Int(Mathf.Max(cornerOne.x, cornerTwo.x), Mathf.Max(cornerOne.y, cornerTwo.y));

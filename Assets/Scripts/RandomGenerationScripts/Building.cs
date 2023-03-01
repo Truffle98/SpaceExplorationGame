@@ -2,29 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Linq;
 
+//Holds info about a building, such as it's bounds and rooms
+//Has functions to generate all the rooms and doors in the building
 public class Building
 {
 
-    private BoundsInt bounds;
+    public BoundsInt bounds;
     private TileBase tile;
     private string buildingType;
+    private BuildingSetup template;
     private List<Room> rooms = new List<Room>();
     private List<Door> doors = new List<Door>();
-    private Dictionary<string, RoomSetup> roomSetups;
     private GameObject buildingParent;
 
     public Building(BoundsInt boundsTemp, TileBase tileTemp, string typeTemp, GameObject parentTemp)
     {
-
         bounds = boundsTemp;
         tile = tileTemp;
         buildingType = typeTemp;
         buildingParent = parentTemp;
         
         TemplateReader reader = new TemplateReader();
-        roomSetups = reader.ReadBuildingTemplate(buildingType);
-
+        template = reader.ReadBuildingTemplate(buildingType);
     }
 
     public void DrawSelf(Tilemap frontMap, Tilemap backMap)
@@ -39,7 +40,7 @@ public class Building
 
         foreach (Door door in doors)
         {
-            door.DrawSelf(frontMap, backMap);
+            door.DrawSelf(frontMap, backMap, buildingParent);
         }
     }
 
@@ -48,7 +49,6 @@ public class Building
     {
 
         int startSide = Random.Range(0, 4);
-        //startSide = 2;
         float startSideAngle = startSide * (Mathf.PI / 2);
         Vector2Int startDoorLoc, startDoorOffset;
 
@@ -61,29 +61,60 @@ public class Building
         //Debug.Log(startDoorOffset);
         //Debug.Log(startDoorLoc);
 
-        doors.Add(new Door(startDoorLoc, startSide, "wideDouble"));
+        doors.Add(new Door(startDoorLoc, startSide, template.startDoor));
 
         Vector2Int minSize = new Vector2Int(8, 8), maxSize = new Vector2Int(15, 15);
         Vector2Int roomSize = new Vector2Int(Random.Range(minSize.x, maxSize.x + 1), Random.Range(minSize.y, maxSize.y + 1));
         BoundsInt roomLoc = new BoundsInt(new Vector3Int(0,0,0), new Vector3Int(0,0,0));
         List<int> potentialLocations = new List<int>();
 
-        RoomSetup startRoom = roomSetups["testingStartRoom"];
+        RoomSetup startRoom = template.roomSetups[template.startRoom];
         Room newRoom = GenerateRoomFromDoor(doors[0], startRoom);
         rooms.Add(newRoom);
 
+        Queue<BranchingPoint> priortiyGenerationQueue = new Queue<BranchingPoint>();
         Queue<BranchingPoint> generationQueue = new Queue<BranchingPoint>();
         Queue<BranchingPoint> finalGenerationQueue = new Queue<BranchingPoint>();
-        generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, startRoom.GenerateRoomSetupQueue(roomSetups), startRoom.doorType));
+        Queue<RoomSetup> newQueue;
+
+        newQueue = startRoom.GeneratePriorityRoomSetupQueue(template.roomSetups);
+        if (newQueue.Count > 0)
+        {
+            priortiyGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+        }
+
+        newQueue = startRoom.GenerateRoomSetupQueue(template.roomSetups);
+        if (newQueue.Count > 0)
+        {
+            generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+        }
+
+        newQueue = startRoom.GenerateSmallRoomSetupQueue(template.roomSetups);
+        if (newQueue.Count > 0)
+        {
+            finalGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+        }
         
         RoomSetup newRoomToMake;
         Door newDoor;
         BranchingPoint curBranchingPoint;
         bool endGeneration = false;
 
-        while (generationQueue.Count > 0)
+        while (generationQueue.Count > 0 || priortiyGenerationQueue.Count > 0 || finalGenerationQueue.Count > 0)
         {
-            curBranchingPoint = generationQueue.Dequeue();
+            if (priortiyGenerationQueue.Count > 0)
+            {
+                curBranchingPoint = priortiyGenerationQueue.Dequeue();
+            }
+            else if (generationQueue.Count > 0)
+            {
+                curBranchingPoint = generationQueue.Dequeue();
+            }
+            else
+            {
+                curBranchingPoint = finalGenerationQueue.Dequeue();
+            }
+            
             while (curBranchingPoint.roomsToMake.Count > 0)
             {
                 newRoomToMake = curBranchingPoint.roomsToMake.Dequeue();
@@ -97,44 +128,24 @@ public class Building
                     {
                         doors.Add(newDoor);
                         rooms.Add(newRoom);
-                        generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newRoomToMake.GenerateRoomSetupQueue(roomSetups), newRoomToMake.doorType));
-                        finalGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newRoomToMake.GenerateSmallRoomSetupQueue(roomSetups), newRoomToMake.doorType));
-                    }
-                    else
-                    {
-                        Debug.Log("Error in room generation");
-                        endGeneration = true;
-                        break;
-                    }
-                }
-                else
-                {
-                    //Debug.Log("Couldn't make room");
-                    continue;
-                }
-            }
-            if (endGeneration)
-            {
-                break;
-            }
-        }
 
-        while (finalGenerationQueue.Count > 0)
-        {
-            curBranchingPoint = finalGenerationQueue.Dequeue();
-            while (curBranchingPoint.roomsToMake.Count > 0)
-            {
-                newRoomToMake = curBranchingPoint.roomsToMake.Dequeue();
-                
-                newDoor = GenerateDoorLocation(curBranchingPoint, newRoomToMake);
-                if (newDoor != null)
-                {
-                    
-                    newRoom = GenerateRoomFromDoor(newDoor, newRoomToMake);
-                    if (newRoom != null)
-                    {
-                        doors.Add(newDoor);
-                        rooms.Add(newRoom);
+                        newQueue = newRoomToMake.GeneratePriorityRoomSetupQueue(template.roomSetups);
+                        if (newQueue.Count > 0)
+                        {
+                            priortiyGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+                        }
+
+                        newQueue = newRoomToMake.GenerateRoomSetupQueue(template.roomSetups);
+                        if (newQueue.Count > 0)
+                        {
+                            generationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+                        }
+
+                        newQueue = newRoomToMake.GenerateSmallRoomSetupQueue(template.roomSetups);
+                        if (newQueue.Count > 0)
+                        {
+                            finalGenerationQueue.Enqueue(new BranchingPoint(newRoom.bounds, newQueue));
+                        }
                     }
                     else
                     {
@@ -158,14 +169,14 @@ public class Building
         foreach(Room room1 in rooms)
         {
 
-            if (!room1.template.canAddDoors)
+            if (room1.template.tags.Contains("noExtraDoors"))
             {
                 continue;
             }
 
             foreach(Room room2 in rooms)
             {
-                if (!room2.template.canAddDoors || room1 == room2)
+                if (room2.template.tags.Contains("noExtraDoors") || room1 == room2)
                 {
                     continue;
                 }
@@ -177,6 +188,30 @@ public class Building
                     doors.Add(newDoor);
                 }
             }
+        }
+
+        List<Door> potentialExteriorDoors = new List<Door>();
+        Door potentialDoor;
+
+        foreach(Room room in rooms)
+        {
+            if (!room.template.tags.Contains("noExtraDoors"))
+            {
+                potentialDoor = GenerateExteriorDoor(room);
+                if (potentialDoor != null)
+                {
+                    potentialExteriorDoors.Add(potentialDoor);
+                }
+            }
+        }
+
+        int maxExtraExteriorDoors = Mathf.Min(template.exteriorDoors, potentialExteriorDoors.Count);
+        int randomIdx;
+        for (int doorCount = 0; doorCount < maxExtraExteriorDoors; doorCount++)
+        {
+            randomIdx = Random.Range(0, potentialExteriorDoors.Count);
+            doors.Add(potentialExteriorDoors[randomIdx]);
+            potentialExteriorDoors.RemoveAt(randomIdx);
         }
     }
 
@@ -320,7 +355,7 @@ public class Building
         {
 
             locationAttempt = new Vector2Int(branchingPoint.bounds.max.x, i);
-            doorAttempt = new Door(locationAttempt, 0, branchingPoint.doorType);
+            doorAttempt = new Door(locationAttempt, 0, roomToMake.doorType);
             spaceAroundDoor = SpaceAroundDoor(doorAttempt);
             
             if (spaceAroundDoor.size.x >= roomToMake.minSize.x && spaceAroundDoor.size.y >= roomToMake.minSize.y)
@@ -334,7 +369,7 @@ public class Building
         {
 
             locationAttempt = new Vector2Int(i, branchingPoint.bounds.max.y);
-            doorAttempt = new Door(locationAttempt, 1, branchingPoint.doorType);
+            doorAttempt = new Door(locationAttempt, 1, roomToMake.doorType);
             spaceAroundDoor = SpaceAroundDoor(doorAttempt);
             
             if (spaceAroundDoor.size.x >= roomToMake.minSize.x && spaceAroundDoor.size.y >= roomToMake.minSize.y)
@@ -348,7 +383,7 @@ public class Building
         {
 
             locationAttempt = new Vector2Int(branchingPoint.bounds.min.x, i);
-            doorAttempt = new Door(locationAttempt, 2, branchingPoint.doorType);
+            doorAttempt = new Door(locationAttempt, 2, roomToMake.doorType);
             spaceAroundDoor = SpaceAroundDoor(doorAttempt);
             
             if (spaceAroundDoor.size.x >= roomToMake.minSize.x && spaceAroundDoor.size.y >= roomToMake.minSize.y)
@@ -362,7 +397,7 @@ public class Building
         {
 
             locationAttempt = new Vector2Int(i, branchingPoint.bounds.min.y);
-            doorAttempt = new Door(locationAttempt, 3, branchingPoint.doorType);
+            doorAttempt = new Door(locationAttempt, 3, roomToMake.doorType);
             spaceAroundDoor = SpaceAroundDoor(doorAttempt);
             
             if (spaceAroundDoor.size.x >= roomToMake.minSize.x && spaceAroundDoor.size.y >= roomToMake.minSize.y)
@@ -390,6 +425,35 @@ public class Building
         Vector2Int potentialLocation;
         bool isValidDoor;
 
+        if (room1.bounds.min.x == room2.bounds.max.x)
+        {
+            for (int i = room1.bounds.min.y + 1; i < room1.bounds.max.y; i++)
+            {
+                if (room2.bounds.min.y < i && i < room2.bounds.max.y)
+                {
+                    potentialLocation = new Vector2Int(room1.bounds.min.x, i);
+                    isValidDoor = true;
+                    foreach (Door door in doors)
+                    {
+                        if (Mathf.Abs(door.location.x - potentialLocation.x) < 4 && Mathf.Abs(door.location.y - potentialLocation.y) < 4)
+                        {
+                            isValidDoor = false;
+                            break;
+                        }
+                    }
+                    if (isValidDoor)
+                    {
+                        potentialDoorLocations.Add(new Door(potentialLocation, 0, room1.template.doorType));
+                    }
+                }
+            }
+        }
+
+        if (potentialDoorLocations.Count > 0)
+        {
+            return potentialDoorLocations[Random.Range(0, potentialDoorLocations.Count)];
+        }
+
         if (room1.bounds.max.y == room2.bounds.min.y)
         {
             for (int i = room1.bounds.min.x + 1; i < room1.bounds.max.x; i++)
@@ -409,7 +473,7 @@ public class Building
                     }
                     if (isValidDoor)
                     {
-                        potentialDoorLocations.Add(new Door(potentialLocation, 0, room1.template.doorType));
+                        potentialDoorLocations.Add(new Door(potentialLocation, 1, room1.template.doorType));
                     }
                 }
             }
@@ -438,7 +502,7 @@ public class Building
                     }
                     if (isValidDoor)
                     {
-                        potentialDoorLocations.Add(new Door(potentialLocation, 1, room1.template.doorType));
+                        potentialDoorLocations.Add(new Door(potentialLocation, 2, room1.template.doorType));
                     }
                 }
             }
@@ -467,35 +531,6 @@ public class Building
                     }
                     if (isValidDoor)
                     {
-                        potentialDoorLocations.Add(new Door(potentialLocation, 2, room1.template.doorType));
-                    }
-                }
-            }
-        }
-
-        if (potentialDoorLocations.Count > 0)
-        {
-            return potentialDoorLocations[Random.Range(0, potentialDoorLocations.Count)];
-        }
-
-        if (room1.bounds.min.x == room2.bounds.max.x)
-        {
-            for (int i = room1.bounds.min.y + 1; i < room1.bounds.max.y; i++)
-            {
-                if (room2.bounds.min.y < i && i < room2.bounds.max.y)
-                {
-                    potentialLocation = new Vector2Int(room1.bounds.min.x, i);
-                    isValidDoor = true;
-                    foreach (Door door in doors)
-                    {
-                        if (Mathf.Abs(door.location.x - potentialLocation.x) < 4 && Mathf.Abs(door.location.y - potentialLocation.y) < 4)
-                        {
-                            isValidDoor = false;
-                            break;
-                        }
-                    }
-                    if (isValidDoor)
-                    {
                         potentialDoorLocations.Add(new Door(potentialLocation, 3, room1.template.doorType));
                     }
                 }
@@ -509,6 +544,42 @@ public class Building
 
         return null;
 
+    }
+
+    Door GenerateExteriorDoor(Room room)
+    {
+        List<Door> potentialDoors = new List<Door>();
+        Door potentialDoor;
+
+        if (room.bounds.max.x >= bounds.max.x - 3)
+        {
+            potentialDoor = new Door(new Vector2Int(room.bounds.max.x, Random.Range(room.bounds.min.y + 1, room.bounds.max.y)), 0, "longSingle");
+            potentialDoors.Add(potentialDoor);
+        }
+
+        if (room.bounds.max.y >= bounds.max.y - 3)
+        {
+            potentialDoor = new Door(new Vector2Int(Random.Range(room.bounds.min.x + 1, room.bounds.max.x), room.bounds.max.y), 1, "longSingle");
+            potentialDoors.Add(potentialDoor);
+        }
+
+        if (room.bounds.min.x <= bounds.min.x + 3)
+        {
+            potentialDoor = new Door(new Vector2Int(room.bounds.min.x, Random.Range(room.bounds.min.y + 1, room.bounds.max.y)), 2, "longSingle");
+            potentialDoors.Add(potentialDoor);
+        }
+
+        if (room.bounds.min.y <= bounds.min.y + 3)
+        {
+            potentialDoor = new Door(new Vector2Int(Random.Range(room.bounds.min.x + 1, room.bounds.max.x), room.bounds.min.y), 3, "longSingle");
+            potentialDoors.Add(potentialDoor);
+        }
+
+        if (potentialDoors.Count > 0)
+        {
+            return potentialDoors[Random.Range(0, potentialDoors.Count)];
+        }
+        return null;
     }
 
     //Function to find the maximum room size around a door

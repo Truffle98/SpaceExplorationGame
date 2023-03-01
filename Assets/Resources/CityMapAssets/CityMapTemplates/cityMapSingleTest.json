@@ -1,0 +1,23 @@
+{
+
+    "width": 9,
+    "citySectorTemplates":[
+        {
+            "ringCount": 1,
+            "rings":[
+                {
+                    "priorityTemplates":[],
+                    "priorityLimits":[],
+                    "templates":["testBlock"],
+                    "limits":[1]
+                }
+            ],
+            "tags":[]
+        }
+
+    ],
+
+    "ensureSpawn":["testCenterObject"],
+    "tags":[]
+
+}

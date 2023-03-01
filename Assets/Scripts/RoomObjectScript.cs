@@ -13,7 +13,9 @@ public class RoomObjectScript : MonoBehaviour
     [HideInInspector]
     public float orientationAngle;
     public Vector2 size;
-    public bool allowObjectsNear;
+    public bool allowObjectsNear, prioritizeNear, shouldTile;
+    [HideInInspector]
+    public bool isFlippedX = false, isFlippedY = false;
 
     public void AcceptBoundaries(Vector2Int startCorner, Vector2Int endCorner, float orientation)
     {
@@ -39,6 +41,7 @@ public class RoomObjectScript : MonoBehaviour
 
         objectCenter += new Vector3(direction.x * xLength / 2f, direction.y * yLength / 2f, 0);
         transform.RotateAround(objectCenter, Vector3.right, 180);
+        isFlippedX = !isFlippedX;
     }
 
     public void FlipYAxis()
@@ -52,6 +55,7 @@ public class RoomObjectScript : MonoBehaviour
 
         objectCenter += new Vector3(direction.x * xLength / 2f, direction.y * yLength / 2f, 0);
         transform.RotateAround(objectCenter, Vector3.up, 180);
+        isFlippedY = !isFlippedY;
     }
 
 }
