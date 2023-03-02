@@ -8,6 +8,9 @@ public class EnemyScript : MonoBehaviour
     private GameObject player, curDoor = null;
     private NavMeshAgent agent;
     private float rotation;
+    private int mode;
+    public int defaultMode;
+    //Modes are represented as follows: 0 - Idle, 1 - Moving somewhere, 2 - Looking around, 3 - Pursuing, 4 - Patrolling, <- rough draft
 
     private void Start() 
     {
@@ -46,17 +49,9 @@ public class EnemyScript : MonoBehaviour
             {
                 break;
             } 
-            else if (hit.collider.tag == "Door")
+            else if (hit.collider.tag == "Player")
             {
-                if (hit.distance <= 1.5f)
-                {
-                    if (curDoor != hit.collider.gameObject)
-                    {
-                        curDoor = hit.collider.gameObject;
-                        curDoor.GetComponent<DoorScript>().Interact();
-                        agent.isStopped = true;
-                    }         
-                }
+
             }
         }
 
