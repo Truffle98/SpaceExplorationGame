@@ -1,0 +1,29 @@
+{
+    "startRoom":"startRoom",
+    "startDoor":"wideDouble",
+    "exteriorDoors": 0,
+    "enemies":[],
+    "enemiesProbabilities":[],
+
+    "roomSetups":[
+        {
+            "roomType":"startRoom",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[8, 8],
+            "roomMax":[8, 8],
+            "priorityRoomsToMake":[],
+            "priorityRoomsToMakeProbabilities":[],
+            "roomsToMake":[],
+            "roomsToMakeProbabilities":[100],
+            "smallRoomsToMake":[],
+            "smallRoomsToMakeProbabilities":[],
+            "roomObjects":["testWallObject"],
+            "roomObjectsProbabilities":[100],
+            "roomObjectsCount":[1],
+            "enemies":[],
+            "enemiesProbabilities":[],
+            "tags":["noExtraDoors"]
+        }
+    ]
+}

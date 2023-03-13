@@ -81,7 +81,39 @@ public class PlayerScript : MonoBehaviour
 
     void MovePlayer()
     {
-        body.velocity = new Vector2(Input.GetAxis("Horizontal") * speed, Input.GetAxis("Vertical") * speed);
+        //body.velocity = new Vector2(Input.GetAxis("Horizontal") * speed, Input.GetAxis("Vertical") * speed);
+        Vector2 move = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        if (move.magnitude > 1.0f)
+        {
+            move.Normalize();
+        }
+        move *= speed;
+        body.velocity = move;
+
+        float distance;
+        RaycastHit2D[] hits;
+        Vector2 rayDirection;
+        EnemyScript[] enemyScripts = FindObjectsOfType<EnemyScript>();
+        foreach (EnemyScript enemyScript in enemyScripts)
+        {
+            distance = Vector3.Distance(enemyScript.transform.position, transform.position);
+            rayDirection = (Vector2)enemyScript.transform.position - (Vector2)transform.position;
+
+            hits = Physics2D.RaycastAll(transform.position, rayDirection, distance);
+            foreach (RaycastHit2D hit in hits)
+            {
+                if (hit.collider.tag == "Wall")
+                {
+                    distance *= 2;
+                    break;
+                }
+            }
+
+            if (distance < body.velocity.magnitude)
+            {
+                enemyScript.HearNoise(transform.position, 5);
+            }
+        }
     }
 
     void MoveCamera()

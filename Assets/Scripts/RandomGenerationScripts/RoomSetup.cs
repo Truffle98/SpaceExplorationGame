@@ -15,8 +15,8 @@ public class RoomSetup
     public string roomType, doorType, floorType;
     public string[] roomsToMake, smallRoomsToMake, priorityRoomsToMake;
     public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities, priorityRoomsToMakeProbabilities;
-    public string[] roomObjects;
-    public int[] roomObjectsProbabilities, roomObjectsCount;
+    public string[] roomObjects, enemies;
+    public int[] roomObjectsProbabilities, roomObjectsCount, enemiesProbabilities;
     public string[] tags;
 
     public void AcceptJSON(RoomTemplateJSON templateJSON)
@@ -50,6 +50,7 @@ public class RoomSetup
             smallRoomsToMake[i] = templateJSON.smallRoomsToMake[i];
             smallRoomsToMakeProbabilities[i] = templateJSON.smallRoomsToMakeProbabilities[i];
         }
+
         roomObjects = new string[templateJSON.roomObjects.Length];
         roomObjectsProbabilities = new int[templateJSON.roomObjects.Length];
         roomObjectsCount = new int[templateJSON.roomObjects.Length];
@@ -60,6 +61,16 @@ public class RoomSetup
             roomObjectsProbabilities[i] = templateJSON.roomObjectsProbabilities[i];
             roomObjectsCount[i] = templateJSON.roomObjectsCount[i];
         }
+
+        enemies = new string[templateJSON.enemies.Length];
+        enemiesProbabilities = new int[templateJSON.enemiesProbabilities.Length];
+        
+        for (int i = 0; i < templateJSON.enemies.Length; i++)
+        {
+            enemies[i] = templateJSON.enemies[i];
+            enemiesProbabilities[i] = templateJSON.enemiesProbabilities[i];
+        }
+
 
         tags = new string[templateJSON.tags.Length];
         for (int i = 0; i < templateJSON.tags.Length; i++)

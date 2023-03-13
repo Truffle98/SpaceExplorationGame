@@ -1,7 +1,9 @@
 {
-    "minBuildings": 4,
+    "minBuildings": 3,
+    "enemies":["testEnemy"],
+    "enemiesProbabilities":[100],
+    "enemiesGroupCount":[3],
     "potentialBuildings":[
-
         {
             "buildingType":"testMedium",
             "minSize":[10, 10],
@@ -14,8 +16,8 @@
         {
             "buildingType":"testSmall",
             "minSize":[10, 10],
-            "maxSize":[12, 12],
-            "count": 6,
+            "maxSize":[10, 10],
+            "count": 5,
             "probability":75,
             "tags":[]
         }

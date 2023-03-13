@@ -46,10 +46,11 @@ public class RandomGenerationScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             GenerateCity(cityType, 0);
+            //Debug.Log("Time taken: " + Time.deltaTime);
         }
         if (Input.GetKeyDown(KeyCode.B))
         {
-            Surface2D.BuildNavMeshAsync();
+            //Surface2D.BuildNavMeshAsync();
             //StartCoroutine(GeneratePaths());
             //Surface2D.
         }
@@ -68,9 +69,11 @@ public class RandomGenerationScript : MonoBehaviour
         var bottomLeft = new Vector2Int(-totalWidth / 2, -totalWidth / 2);
         var topRight = new Vector2Int(totalWidth / 2, totalWidth / 2);
 
-        backMap.SetTile(new Vector3Int(bottomLeft.x, bottomLeft.y, 0), ground);
-        backMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), ground);
-        backMap.FloodFill(new Vector3Int(0, 0, 0), ground);
+        // backMap.SetTile(new Vector3Int(bottomLeft.x, bottomLeft.y, 0), ground);
+        // backMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), ground);
+        // backMap.FloodFill(new Vector3Int(0, 0, 0), ground);
+
+        DrawBackground(template, backMap, bottomLeft, topRight);
 
         List<Vector2Int> citySectorCenters;
         citySectorCenters = GenerateCityCenters(template);
@@ -96,6 +99,21 @@ public class RandomGenerationScript : MonoBehaviour
 
         frontMap.SetTile(new Vector3Int(bottomLeft.x, bottomLeft.y, 0), null);
         frontMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), null);
+
+        Surface2D.BuildNavMesh();
+
+        //StartCoroutine(WaitMoment());
+
+        for (int i = 0; i < template.width; i++)
+        {
+            for (int j = 0; j < template.width; j++)
+            {
+                if (cityMap[i, j] != null)
+                {
+                    cityMap[i, j].SpawnEnemies();
+                }
+            }
+        }
 
         if (!CheckEnsureSpawn(template))
         {
@@ -440,8 +458,8 @@ public class RandomGenerationScript : MonoBehaviour
 
     bool PriorityLandingZone(Vector2Int location, CityBlock[,] cityMap, CityMapSetup template)
     {
-        var bottomLeft = new Vector2Int(Mathf.Max(0, location.x - 2), Mathf.Max(0, location.y - 2));
-        var topRight = new Vector2Int(Mathf.Min(template.width - 1, location.x + 2), Mathf.Min(template.width - 1, location.y + 2));
+        var bottomLeft = new Vector2Int(Mathf.Max(0, location.x - 1), Mathf.Max(0, location.y - 1));
+        var topRight = new Vector2Int(Mathf.Min(template.width - 1, location.x + 1), Mathf.Min(template.width - 1, location.y + 1));
 
         for (int i = bottomLeft.x; i <= topRight.x; i++)
         {
@@ -473,16 +491,45 @@ public class RandomGenerationScript : MonoBehaviour
         return;
     }
 
+    void DrawBackground(CityMapSetup template, Tilemap backmap, Vector2 bottomLeft, Vector2 topRight)
+    {
+        var offset = new Vector2(Random.Range(-200, 200), Random.Range(-200, 200));
+        Vector2 curPoint;
+        float noise;
+
+        TileBase[] tiles = new TileBase[3];
+        tiles[0] = Resources.Load<TileBase>("CityMapAssets/BackgroundTiles/" + "testColor1");
+        tiles[1] = Resources.Load<TileBase>("CityMapAssets/BackgroundTiles/" + "testColor2");
+        tiles[2] = Resources.Load<TileBase>("CityMapAssets/BackgroundTiles/" + "testColor3");
+
+        for (int i = (int)bottomLeft.x; i <= topRight.x; i++)
+        {
+            for (int j = (int)bottomLeft.y; j <= topRight.y; j++)
+            {
+                curPoint = new Vector2(i / 50f, j / 50f) + offset;
+                noise = Mathf.PerlinNoise(curPoint.x, curPoint.y);
+
+                if (noise >= 0.65f)
+                {
+                    backMap.SetTile(new Vector3Int(i, j, 0), tiles[0]);
+                }
+                else if (noise <= 0.35f)
+                {
+                    backMap.SetTile(new Vector3Int(i, j, 0), tiles[2]);
+                }
+                else
+                {
+                    backMap.SetTile(new Vector3Int(i, j, 0), tiles[1]);
+                }
+            }
+        }
+    }
+
     public void ResetCity()
     {
         Destroy(cityParent);
         frontMap.ClearAllTiles();
         backMap.ClearAllTiles();
-    }
-
-    IEnumerator GeneratePaths()
-    {
-        yield return new WaitForSeconds(.1f);
     }
 
     bool CheckEnsureSpawn(CityMapSetup template)
@@ -497,99 +544,5 @@ public class RandomGenerationScript : MonoBehaviour
 
         return true;
     }
-    List<BoundsInt> BinarySpacePartitioning(BoundsInt spaceToSplit, int minWidth, int minHeight, int maxWidth, int maxHeight)
-    {
-        Queue<BoundsInt> roomsQueue = new Queue<BoundsInt>();
-        List<BoundsInt> roomsList = new List<BoundsInt>();
-        roomsQueue.Enqueue(spaceToSplit);
-        while(roomsQueue.Count > 0)
-        {
-            var room = roomsQueue.Dequeue();
-            if(room.size.y >= minHeight && room.size.x >= minWidth)
-            {
-                if (Random.value > ((roomsList.Count * 4) - 32) / 100f || room.size.y > maxHeight || room.size.x > maxWidth)
-                {
-                    if(Random.value < 0.5f)
-                    {
-                        if(room.size.y >= minHeight * 2)
-                        {
-                            SplitHorizontally(minHeight, roomsQueue, room);
-                        }else if(room.size.x >= minWidth * 2)
-                        {
-                            SplitVertically(minWidth, roomsQueue, room);
-                        }else if (CheckRoomValid(room))
-                        {
-                            roomsList.Add(room);
-                        }
-                    }
-                    else
-                    {
-                        if (room.size.x >= minWidth * 2)
-                        {
-                            SplitVertically(minWidth, roomsQueue, room);
-                        }
-                        else if (room.size.y >= minHeight * 2)
-                        {
-                            SplitHorizontally(minHeight, roomsQueue, room);
-                        }
-                        else if (CheckRoomValid(room))
-                        {
-                            roomsList.Add(room);
-                        }
-                    }
-                }
-                else if (CheckRoomValid(room))
-                {
-                    roomsList.Add(room);
-                }
-            }
-        }
-        return roomsList;
-    }
 
-    void SplitVertically(int minWidth, Queue<BoundsInt> roomsQueue, BoundsInt room)
-    {
-        var xSplit = Random.Range(1, room.size.x);
-        BoundsInt room1 = new BoundsInt(room.min, new Vector3Int(xSplit, room.size.y, room.size.z));
-        BoundsInt room2 = new BoundsInt(new Vector3Int(room.min.x + xSplit, room.min.y, room.min.z),
-            new Vector3Int(room.size.x - xSplit, room.size.y, room.size.z));
-        roomsQueue.Enqueue(room1);
-        roomsQueue.Enqueue(room2);
-    }
-
-    void SplitHorizontally(int minHeight, Queue<BoundsInt> roomsQueue, BoundsInt room)
-    {
-        var ySplit = Random.Range(1, room.size.y);
-        BoundsInt room1 = new BoundsInt(room.min, new Vector3Int(room.size.x, ySplit, room.size.z));
-        BoundsInt room2 = new BoundsInt(new Vector3Int(room.min.x, room.min.y + ySplit, room.min.z),
-            new Vector3Int(room.size.x, room.size.y - ySplit, room.size.z));
-        roomsQueue.Enqueue(room1);
-        roomsQueue.Enqueue(room2);
-    }
-
-    private int clearDistance = 20;
-    bool CheckRoomValid(BoundsInt room)
-    {
-        if (room.Contains(new Vector3Int(0,0,0)))
-        {
-            return false;
-        }
-        else if (room.Contains(new Vector3Int(clearDistance, clearDistance, 0)))
-        {
-            return false;
-        }
-        else if (room.Contains(new Vector3Int(clearDistance, -clearDistance, 0)))
-        {
-            return false;
-        }
-        else if (room.Contains(new Vector3Int(-clearDistance, clearDistance, 0)))
-        {
-            return false;
-        }
-        else if (room.Contains(new Vector3Int(-clearDistance, -clearDistance, 0)))
-        {
-            return false;
-        }
-        return true;
-    }
 }

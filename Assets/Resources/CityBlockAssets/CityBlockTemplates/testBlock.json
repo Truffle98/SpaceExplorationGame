@@ -1,5 +1,9 @@
 {
     "minBuildings": 1,
+    "enemies":[],
+    "enemiesProbabilities":[],
+    "enemiesGroupCount":[],
+
     "potentialBuildings":[
         {
             "buildingType":"testBlock",

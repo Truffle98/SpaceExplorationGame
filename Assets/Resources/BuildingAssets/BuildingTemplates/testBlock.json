@@ -2,6 +2,8 @@
     "startRoom":"testingStartRoom",
     "startDoor":"wideDouble",
     "exteriorDoors": 3,
+    "enemies":["testEnemy"],
+    "enemiesProbabilities":[100],
 
     "roomSetups":[
         {
@@ -19,6 +21,8 @@
             "roomObjects":["testCenterObject", "testWallObject"],
             "roomObjectsProbabilities":[100, 100],
             "roomObjectsCount":[10, 3],
+            "enemies":["testEnemy", "testEnemy"],
+            "enemiesProbabilities":[75, 75],
             "tags":["noExtraDoors"]
         },
 
@@ -37,6 +41,8 @@
             "roomObjects":[],
             "roomObjectsProbabilities":[],
             "roomObjectsCount":[],
+            "enemies":[],
+            "enemiesProbabilities":[],
             "tags":[]
         },
 
@@ -55,6 +61,8 @@
             "roomObjects":[],
             "roomObjectsProbabilities":[],
             "roomObjectsCount":[],
+            "enemies":[],
+            "enemiesProbabilities":[],
             "tags":[]
         },
 
@@ -73,6 +81,8 @@
             "roomObjects":[],
             "roomObjectsProbabilities":[],
             "roomObjectsCount":[],
+            "enemies":[],
+            "enemiesProbabilities":[],
             "tags":[]
         },
 
@@ -91,6 +101,8 @@
             "roomObjects":[],
             "roomObjectsProbabilities":[],
             "roomObjectsCount":[],
+            "enemies":[],
+            "enemiesProbabilities":[],
             "tags":[]
         },
 
@@ -109,6 +121,8 @@
             "roomObjects":["testWallObject", "testCenterObject"],
             "roomObjectsProbabilities":[50, 75],
             "roomObjectsCount":[3, 4],
+            "enemies":["testEnemy"],
+            "enemiesProbabilities":[100],
             "tags":["noExtraDoors"]
         }
     ]

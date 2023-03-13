@@ -104,18 +104,18 @@ public class CityBlockSetupJSON
 {
     public int minBuildings;
     public BuildingTemplateJSON[] potentialBuildings;
+    public string[] enemies;
+    public int[] enemiesProbabilities, enemiesGroupCount;
     public string[] tags;
 }
 
 [System.Serializable]
 public class BuildingTemplateJSON
 {
-
     public string buildingType;
     public int[] minSize, maxSize;
     public int count, probability;
     public string[] tags;
-
 }
 
 [System.Serializable]
@@ -123,6 +123,8 @@ public class BuildingSetupJSON
 {
     public int exteriorDoors;
     public string startRoom, startDoor;
+    public string[] enemies;
+    public int[] enemiesProbabilities;
     public RoomTemplateJSON[] roomSetups;
 }
 
@@ -135,5 +137,7 @@ public class RoomTemplateJSON
     public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities, priorityRoomsToMakeProbabilities;
     public string[] roomObjects;
     public int[] roomObjectsCount;
+    public string[] enemies;
+    public int[] enemiesProbabilities;
     public string[] tags;
 }

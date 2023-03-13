@@ -1,0 +1,70 @@
+{
+    "startRoom":"startRoom",
+    "startDoor":"wideDouble",
+    "exteriorDoors": 0,
+    "enemies":["testEnemy"],
+    "enemiesProbabilities":[100],
+
+    "roomSetups":[
+        {
+            "roomType":"startRoom",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[4, 4],
+            "roomMax":[6, 6],
+            "priorityRoomsToMake":[],
+            "priorityRoomsToMakeProbabilities":[],
+            "roomsToMake":["office", "office", "office"],
+            "roomsToMakeProbabilities":[100, 100, 50],
+            "smallRoomsToMake":["bathroom"],
+            "smallRoomsToMakeProbabilities":[100],
+            "roomObjects":[],
+            "roomObjectsProbabilities":[],
+            "roomObjectsCount":[],
+            "enemies":[],
+            "enemiesProbabilities":[],
+            "tags":["noExtraDoors"]
+        },
+
+        {
+            "roomType":"office",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[3, 3],
+            "roomMax":[5, 5],
+            "priorityRoomsToMake":[],
+            "priorityRoomsToMakeProbabilities":[],
+            "roomsToMake":[],
+            "roomsToMakeProbabilities":[],
+            "smallRoomsToMake":[],
+            "smallRoomsToMakeProbabilities":[],
+            "roomObjects":["testCenterObject"],
+            "roomObjectsProbabilities":[100],
+            "roomObjectsCount":[1],
+            "enemies":[],
+            "enemiesProbabilities":[],
+            "tags":["noExtraDoors"]
+        },
+
+        {
+            "roomType":"bathroom",
+            "doorType":"single",
+            "floorType":"testFloor",
+            "roomMin":[2, 2],
+            "roomMax":[3, 3],
+            "priorityRoomsToMake":[],
+            "priorityRoomsToMakeProbabilities":[],
+            "roomsToMake":[],
+            "roomsToMakeProbabilities":[],
+            "smallRoomsToMake":[],
+            "smallRoomsToMakeProbabilities":[],
+            "roomObjects":["testCenterObject"],
+            "roomObjectsProbabilities":[50],
+            "roomObjectsCount":[1],
+            "enemies":["testEnemy"],
+            "enemiesProbabilities":[50],
+            "tags":[]
+        }
+
+    ]
+}

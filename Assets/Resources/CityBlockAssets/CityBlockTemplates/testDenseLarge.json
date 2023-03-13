@@ -1,5 +1,8 @@
 {
-    "minBuildings": 2,
+    "minBuildings": 4,
+    "enemies":[],
+    "enemiesProbabilities":[],
+    "enemiesGroupCount":[],
     "potentialBuildings":[
         
         {

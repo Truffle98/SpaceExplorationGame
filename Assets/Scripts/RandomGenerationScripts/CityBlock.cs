@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Linq;
 
 //Contains info for a City Block, such as its bounds, buildings, and type
 //Has functions to generate it's buildings
@@ -31,7 +32,10 @@ public class CityBlock
     {
         foreach (Building building in buildings)
         {
-            building.DrawSelf(frontMap, backMap);
+            if (!building.failed)
+            {
+                building.DrawSelf(frontMap, backMap);
+            }
         }
     }
 
@@ -44,6 +48,7 @@ public class CityBlock
     {
         buildings = new List<Building>();
         BuildingTemplate curTemplate;
+        Building newBuilding;
         Vector2Int size;
         List<BoundsInt> potentialLocations = new List<BoundsInt>();
         BoundsInt curBounds;
@@ -76,7 +81,9 @@ public class CityBlock
                     {
                         buildingParent = new GameObject("Building Parent " + (buildings.Count));
                         buildingParent.transform.parent = blockParent.transform;
-                        buildings.Add(new Building(potentialLocations[Random.Range(0, potentialLocations.Count)], tile, curTemplate.buildingType, buildingParent));
+                        newBuilding = new Building(potentialLocations[Random.Range(0, potentialLocations.Count)], tile, curTemplate.buildingType, buildingParent);
+                        newBuilding.AcceptTags(curTemplate.tags);
+                        buildings.Add(newBuilding);
                     }
                 }
             }
@@ -113,101 +120,103 @@ public class CityBlock
 
     }
 
-    List<BoundsInt> BinarySpacePartitioning(BoundsInt spaceToSplit, int minWidth, int minHeight, int maxWidth, int maxHeight)
+    public void SpawnEnemies()
     {
-        Queue<BoundsInt> roomsQueue = new Queue<BoundsInt>();
-        List<BoundsInt> roomsList = new List<BoundsInt>();
-        roomsQueue.Enqueue(spaceToSplit);
-        while(roomsQueue.Count > 0)
+        List<Vector2> patrolLocations = new List<Vector2>();
+        Door curDoor;
+        Vector2 curLocation;
+        float curOrientationAngle;
+        foreach (Building building in buildings)
         {
-            var room = roomsQueue.Dequeue();
-            if(room.size.y >= minHeight && room.size.x >= minWidth)
+
+            if (building.failed)
             {
-                if (Random.value > ((roomsList.Count * 4) - 32) / 100f || room.size.y > maxHeight || room.size.x > maxWidth)
+                continue;
+            }
+
+            building.SpawnEnemies();
+
+            if (building.template.tags.Contains("noPatrol"))
+            {
+                continue;
+            }
+
+            curDoor = building.ReturnFrontDoor();
+            curLocation = curDoor.location;
+            curOrientationAngle = curDoor.orientationAngle + Mathf.PI;
+            patrolLocations.Add(curLocation + new Vector2(2f * Mathf.Cos(curOrientationAngle) + 0.5f, 2f * Mathf.Sin(curOrientationAngle) + 0.5f));
+        }
+
+        GameObject curEnemy, newEnemy;
+        List<EnemyScript> followers;
+        EnemyScript leader;
+        EnemySetup curSetup;
+        int groupSize;
+
+        for (int i = 0; i < template.enemies.Length; i++)
+        {
+            groupSize = 0;
+            for (int j = 0; j < template.enemiesGroupCount[i]; j++)
+            {
+                if (Random.Range(0, 100) < template.enemiesProbabilities[i])
                 {
-                    if(Random.value < 0.5f)
-                    {
-                        if(room.size.y >= minHeight * 2)
-                        {
-                            SplitHorizontally(minHeight, roomsQueue, room);
-                        }else if(room.size.x >= minWidth * 2)
-                        {
-                            SplitVertically(minWidth, roomsQueue, room);
-                        }else if (CheckRoomValid(room))
-                        {
-                            roomsList.Add(room);
-                        }
-                    }
-                    else
-                    {
-                        if (room.size.x >= minWidth * 2)
-                        {
-                            SplitVertically(minWidth, roomsQueue, room);
-                        }
-                        else if (room.size.y >= minHeight * 2)
-                        {
-                            SplitHorizontally(minHeight, roomsQueue, room);
-                        }
-                        else if (CheckRoomValid(room))
-                        {
-                            roomsList.Add(room);
-                        }
-                    }
-                }
-                else if (CheckRoomValid(room))
-                {
-                    roomsList.Add(room);
+                    groupSize++;
                 }
             }
+
+            if (groupSize == 1 || patrolLocations.Count == 1)
+            {
+                if (patrolLocations.Count > 1)
+                {
+                    curLocation = patrolLocations[Random.Range(0, patrolLocations.Count)];
+                    curSetup = new EnemySetup();
+                    curSetup.type = 4;
+                    curSetup.patrolLocations = patrolLocations;
+
+                    curEnemy = Resources.Load<GameObject>("EnemyAssets/" + template.enemies[i]);
+                    newEnemy = GameObject.Instantiate(curEnemy, curLocation, Quaternion.Euler(0,0,0), blockParent.transform);
+                    newEnemy.GetComponent<EnemyScript>().SetupEnemy(curSetup);
+                }
+                else if (patrolLocations.Count == 1)
+                {
+                    curLocation = patrolLocations[0];
+                    curSetup = new EnemySetup();
+                    curSetup.type = 0;
+                    curSetup.guardLocation = curLocation;
+
+                    curEnemy = Resources.Load<GameObject>("EnemyAssets/" + template.enemies[i]);
+                    newEnemy = GameObject.Instantiate(curEnemy, curLocation, Quaternion.Euler(0,0,0), blockParent.transform);
+                    newEnemy.GetComponent<EnemyScript>().SetupEnemy(curSetup);
+                }
+            }
+            else if (groupSize > 1 && patrolLocations.Count > 1)
+            {
+                
+                curLocation = patrolLocations[Random.Range(0, patrolLocations.Count)];
+                curEnemy = Resources.Load<GameObject>("EnemyAssets/" + template.enemies[i]);
+                newEnemy = GameObject.Instantiate(curEnemy, curLocation, Quaternion.Euler(0,0,0), blockParent.transform);
+                leader = newEnemy.GetComponent<EnemyScript>();
+
+                followers = new List<EnemyScript>();
+                for (int j = 0; j < groupSize - 1; j++)
+                {
+                    curSetup = new EnemySetup();
+                    curSetup.type = 2;
+                    curSetup.patrolLocations = patrolLocations;
+                    curSetup.leader = leader;
+                    newEnemy = GameObject.Instantiate(curEnemy, curLocation, Quaternion.Euler(0,0,0), blockParent.transform);
+                    newEnemy.GetComponent<EnemyScript>().SetupEnemy(curSetup);
+                    followers.Add(newEnemy.GetComponent<EnemyScript>());
+                }
+
+                curSetup = new EnemySetup();
+                curSetup.type = 4;
+                curSetup.patrolLocations = patrolLocations;
+                curSetup.leader = leader;
+                curSetup.followers = followers;
+                leader.GetComponent<EnemyScript>().SetupEnemy(curSetup);
+            }
+
         }
-        return roomsList;
     }
-
-    void SplitVertically(int minWidth, Queue<BoundsInt> roomsQueue, BoundsInt room)
-    {
-        var xSplit = Random.Range(1, room.size.x);
-        BoundsInt room1 = new BoundsInt(room.min, new Vector3Int(xSplit, room.size.y, room.size.z));
-        BoundsInt room2 = new BoundsInt(new Vector3Int(room.min.x + xSplit, room.min.y, room.min.z),
-            new Vector3Int(room.size.x - xSplit, room.size.y, room.size.z));
-        roomsQueue.Enqueue(room1);
-        roomsQueue.Enqueue(room2);
-    }
-
-    void SplitHorizontally(int minHeight, Queue<BoundsInt> roomsQueue, BoundsInt room)
-    {
-        var ySplit = Random.Range(1, room.size.y);
-        BoundsInt room1 = new BoundsInt(room.min, new Vector3Int(room.size.x, ySplit, room.size.z));
-        BoundsInt room2 = new BoundsInt(new Vector3Int(room.min.x, room.min.y + ySplit, room.min.z),
-            new Vector3Int(room.size.x, room.size.y - ySplit, room.size.z));
-        roomsQueue.Enqueue(room1);
-        roomsQueue.Enqueue(room2);
-    }
-
-    private int clearDistance = 20;
-    bool CheckRoomValid(BoundsInt room)
-    {
-        if (room.Contains(new Vector3Int(0,0,0)))
-        {
-            return false;
-        }
-        else if (room.Contains(new Vector3Int(clearDistance, clearDistance, 0)))
-        {
-            return false;
-        }
-        else if (room.Contains(new Vector3Int(clearDistance, -clearDistance, 0)))
-        {
-            return false;
-        }
-        else if (room.Contains(new Vector3Int(-clearDistance, clearDistance, 0)))
-        {
-            return false;
-        }
-        else if (room.Contains(new Vector3Int(-clearDistance, -clearDistance, 0)))
-        {
-            return false;
-        }
-        return true;
-    }
-
-
 }

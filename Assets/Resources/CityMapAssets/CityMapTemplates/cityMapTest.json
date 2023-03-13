@@ -16,32 +16,11 @@
                     "priorityTemplates":["testBlock"],
                     "priorityLimits":[1],
                     "templates":["testDenseLarge", "testDenseSmall", "empty"],
-                    "limits":[4, 8, 4]
+                    "limits":[2, 1, 3]
                 }
             ],
-            "tags":["needsSpace"]
-        },
-
-        {
-            "ringCount": 2,
-            "rings":[
-                {
-                    "priorityTemplates":[],
-                    "priorityLimits":[],
-                    "templates":["testBlock"],
-                    "limits":[1]
-                },
-
-                {
-                    "priorityTemplates":["testBlock"],
-                    "priorityLimits":[1],
-                    "templates":["testDenseLarge", "testDenseSmall", "empty"],
-                    "limits":[4, 8, 4]
-                }
-            ],
-            "tags":["prioritizeNear"]
+            "tags":[]
         }
-
     ],
 
     "ensureSpawn":[],

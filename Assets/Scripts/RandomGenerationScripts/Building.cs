@@ -12,10 +12,11 @@ public class Building
     public BoundsInt bounds;
     private TileBase tile;
     private string buildingType;
-    private BuildingSetup template;
+    public BuildingSetup template;
     private List<Room> rooms = new List<Room>();
     private List<Door> doors = new List<Door>();
     private GameObject buildingParent;
+    public bool failed = false;
 
     public Building(BoundsInt boundsTemp, TileBase tileTemp, string typeTemp, GameObject parentTemp)
     {
@@ -26,15 +27,28 @@ public class Building
         
         TemplateReader reader = new TemplateReader();
         template = reader.ReadBuildingTemplate(buildingType);
+        GenerateLayout();
+    }
+
+    public void AcceptTags(string[] tags)
+    {
+        template.AcceptTags(tags);
     }
 
     public void DrawSelf(Tilemap frontMap, Tilemap backMap)
     {
+        if (rooms[0] == null)
+        {
+            return;
+        }
         frontMap.BoxFill(Vector3Int.FloorToInt(bounds.center), tile, bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-        GenerateLayout();
 
         foreach (Room room in rooms)
         {
+            if (room == null)
+            {
+                continue;
+            }
             room.DrawSelf(frontMap, backMap, doors, buildingParent);
         }
 
@@ -42,6 +56,70 @@ public class Building
         {
             door.DrawSelf(frontMap, backMap, buildingParent);
         }
+    }
+
+    public void SpawnEnemies()
+    {
+        Vector2? curLocation;
+        List<Vector2> patrolLocations = new List<Vector2>();
+
+        foreach (Room room in rooms)
+        {
+            if (room == null)
+            {
+                continue;
+            }
+            room.SpawnEnemies(buildingParent);
+
+            if (room.template.tags.Contains("noPatrol"))
+            {
+                continue;
+            }
+
+            curLocation = room.ReturnFreeSpace();
+            if (curLocation != null)
+            {
+                patrolLocations.Add((Vector2)curLocation);
+            }
+        }
+
+        EnemySetup curSetup;
+        GameObject curEnemy, newEnemy;
+        Vector2 chosenLocation;
+
+        for (int i = 0; i < template.enemies.Length; i++)
+        {
+            if (Random.Range(0, 100) < template.enemiesProbabilities[i])
+            {
+                if (patrolLocations.Count > 1)
+                {
+                    chosenLocation = patrolLocations[Random.Range(0, patrolLocations.Count)];
+                    curSetup = new EnemySetup();
+                    curSetup.type = 4;
+                    curSetup.patrolLocations = patrolLocations;
+
+                    curEnemy = Resources.Load<GameObject>("EnemyAssets/" + template.enemies[i]);
+                    newEnemy = GameObject.Instantiate(curEnemy, chosenLocation, Quaternion.Euler(0,0,0), buildingParent.transform);
+                    newEnemy.GetComponent<EnemyScript>().SetupEnemy(curSetup);
+                }
+                else if (patrolLocations.Count == 1)
+                {
+                    chosenLocation = patrolLocations[0];
+                    curSetup = new EnemySetup();
+                    curSetup.type = 0;
+                    curSetup.guardLocation = chosenLocation;
+
+                    curEnemy = Resources.Load<GameObject>("EnemyAssets/" + template.enemies[i]);
+                    newEnemy = GameObject.Instantiate(curEnemy, chosenLocation, Quaternion.Euler(0,0,0), buildingParent.transform);
+                    newEnemy.GetComponent<EnemyScript>().SetupEnemy(curSetup);
+                }
+            }
+        }
+    }
+
+    public Door ReturnFrontDoor()
+    {
+        return doors[0];
     }
 
     //Generates the full room layout of the building
@@ -70,6 +148,13 @@ public class Building
 
         RoomSetup startRoom = template.roomSetups[template.startRoom];
         Room newRoom = GenerateRoomFromDoor(doors[0], startRoom);
+
+        if (newRoom == null)
+        {
+            failed = true;
+            return;
+        }
+
         rooms.Add(newRoom);
 
         Queue<BranchingPoint> priortiyGenerationQueue = new Queue<BranchingPoint>();
@@ -168,6 +253,13 @@ public class Building
 
         foreach(Room room1 in rooms)
         {
+            if (room1 == null)
+            {
+                // Debug.Log("Room is null");
+                // Debug.Log("Type: " + buildingType);
+                // Debug.Log("Count: " + rooms.Count);
+                continue;
+            }
 
             if (room1.template.tags.Contains("noExtraDoors"))
             {
@@ -195,6 +287,11 @@ public class Building
 
         foreach(Room room in rooms)
         {
+            if (room == null)
+            {
+                continue;
+            }
+
             if (!room.template.tags.Contains("noExtraDoors"))
             {
                 potentialDoor = GenerateExteriorDoor(room);
@@ -223,15 +320,6 @@ public class Building
         Vector2Int roomSizeMax = new Vector2Int(Mathf.Min(roomTemplate.maxSize.x, availableSpace.size.x), Mathf.Min(roomTemplate.maxSize.y, availableSpace.size.y));
         Vector2Int roomSize = new Vector2Int(Random.Range(roomTemplate.minSize.x, roomSizeMax.x), Random.Range(roomTemplate.minSize.y, roomSizeMax.y));
 
-        //roomSize = new Vector2Int(10,10);
-        //Debug.Log("Size info:");
-        //Debug.Log(availableSpace.size);
-        //Debug.Log(availableSpace.min);
-        //Debug.Log(availableSpace.max);
-        //Debug.Log(roomTemplate.minSize);
-        //Debug.Log(roomSizeMax);
-        //Debug.Log(roomSize);
-
         List<Room> priorityRoomLocations = new List<Room>();
         List<Room> potentialRoomLocations = new List<Room>();
         float curAngle = door.orientationAngle + (Mathf.PI / 2), fillAngle = door.orientationAngle - (Mathf.PI / 4);
@@ -255,7 +343,6 @@ public class Building
         
         while (true)
         {
-            //Debug.Log(startingPoint);
             testBounds = new BoundsInt(new Vector3Int(startingPoint.x, startingPoint.y, 0), new Vector3Int((int)Mathf.Round(Mathf.Cos(fillAngle) / 0.707f * roomSize.x), 
                                                                     (int)Mathf.Round(Mathf.Sin(fillAngle) / 0.707f * roomSize.y), 0));
             isValidRoom = true;

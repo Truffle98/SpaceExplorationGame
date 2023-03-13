@@ -27,14 +27,23 @@ public class Room
         //Debug.Log(bounds.max);
         frontMap.BoxFill(Vector3Int.FloorToInt(bounds.center), null, bounds.min.x + 1, bounds.min.y + 1, bounds.max.x - 1, bounds.max.y - 1);
         TileBase floor = Resources.Load<TileBase>("RoomAssets/Floors/" + template.floorType);
-        backMap.BoxFill(Vector3Int.FloorToInt(bounds.center), floor, bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+
+        for (int i = bounds.min.x; i <= bounds.max.x; i++)
+        {
+            for (int j = bounds.min.y; j <= bounds.max.y; j++)
+            {
+                backMap.SetTile(new Vector3Int(i, j, 0), floor);
+            }
+        }
+
+        //backMap.BoxFill(Vector3Int.FloorToInt(bounds.center), floor, bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
 
         GenerateFurniture(doors, buildingParent);
     }
 
     public void GenerateFurniture(List<Door> doors, GameObject buildingParent)
     {
-        List<GameObject> roomObjects = new List<GameObject>();
+        roomObjects = new List<GameObject>();
         GameObject curObject;
         RoomObjectScript curObjectScript;
         Vector2Int startCorner, endCorner, cornerOffsetDirection, offset, offsetDistance;
@@ -537,6 +546,79 @@ public class Room
         }
 
         return false;
+
+    }
+
+    public void SpawnEnemies(GameObject buildingParent)
+    {
+        EnemySetup curSetup;
+        Vector2? curLocation;
+        GameObject curEnemy, newEnemy;
+
+        for (int i = 0; i < template.enemies.Length; i++)
+        {
+
+            if (Random.Range(0, 100) < template.enemiesProbabilities[i])
+            {
+                curLocation = ReturnFreeSpace();
+
+                if (curLocation != null)
+                {
+                    curSetup = new EnemySetup();
+                    curSetup.type = 0;
+                    curSetup.guardLocation = (Vector2)curLocation;
+
+                    curEnemy = Resources.Load<GameObject>("EnemyAssets/" + template.enemies[i]);
+                    newEnemy = GameObject.Instantiate(curEnemy, (Vector2)curLocation, Quaternion.Euler(0,0,0), buildingParent.transform);
+                    newEnemy.GetComponent<EnemyScript>().SetupEnemy(curSetup);
+                }
+            }
+        }
+
+
+    }
+
+    public Vector2? ReturnFreeSpace()
+    {
+        Vector2 curLocation;
+        List<Vector2> potentialLocations = new List<Vector2>();
+
+        for (int x = bounds.min.x + 1; x < bounds.max.x - 1; x++)
+        {
+            for (int y = bounds.min.y + 1; y < bounds.max.y - 1; y++)
+            {
+                curLocation = new Vector2(x, y);
+
+                if (CheckSpawnLocationValid(curLocation, roomObjects))
+                {
+                    potentialLocations.Add(curLocation);
+                }
+            }
+        }
+
+        if (potentialLocations.Count > 0)
+        {
+            return potentialLocations[Random.Range(0, potentialLocations.Count)] + new Vector2(0.5f, 0.5f);
+        }
+        return null;
+
+    }
+
+    bool CheckSpawnLocationValid(Vector2 location, List<GameObject> gos)
+    {
+        BoundsInt GOBounds;
+
+        foreach(GameObject go in gos)
+        {
+
+            GOBounds = go.GetComponent<RoomObjectScript>().bounds;
+
+            if ((GOBounds.min.x <= location.x && location.x <= GOBounds.max.x) && (GOBounds.min.y <= location.y && location.y <= GOBounds.max.y))
+            {
+                return false;
+            }
+        }
+        return true;
 
     }
 }
