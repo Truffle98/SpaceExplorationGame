@@ -3,6 +3,9 @@
     "enemies":["testEnemy"],
     "enemiesProbabilities":[100],
     "enemiesGroupCount":[3],
+    "groundTypes":["roadTile1", "roadTile2"],
+    "groundTypesProbabilities":[75, 25],
+
     "potentialBuildings":[
         {
             "buildingType":"testMedium",

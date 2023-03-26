@@ -10,15 +10,16 @@ public class CityBlock
 {
     public BoundsInt bounds;
     public string blockType;
-    private TileBase tile;
+    private TileBase wall;
+    private TileBase[] grounds;
     private List<Building> buildings = new List<Building>();
     private GameObject blockParent;
     CityBlockSetup template;
 
-    public CityBlock(BoundsInt boundsTemp, TileBase tileTemp, string typeTemp, GameObject parentTemp)
+    public CityBlock(BoundsInt boundsTemp, TileBase wallTemp, string typeTemp, GameObject parentTemp)
     {
         bounds = boundsTemp;
-        tile = tileTemp;
+        wall = wallTemp;
         blockType = typeTemp;
         blockParent = parentTemp;
 
@@ -30,6 +31,30 @@ public class CityBlock
 
     public void DrawSelf(Tilemap frontMap, Tilemap backMap)
     {
+        grounds = new TileBase[template.groundTypes.Length];
+        for (int i = 0; i < template.groundTypes.Length; i++)
+        {
+            grounds[i] = Resources.Load<TileBase>("Tiles/" + template.groundTypes[i]);
+        }
+
+        int randomNum;
+        for (int x = bounds.min.x; x <= bounds.max.x; x++)
+        {
+            for (int y = bounds.min.y; y <= bounds.max.y; y++)
+            {
+                randomNum = Random.Range(0, 100);
+                for (int tileIdx = 0; tileIdx < grounds.Length; tileIdx++)
+                {
+                    if (randomNum < template.groundTypesProbabilities[tileIdx])
+                    {
+                        backMap.SetTile(new Vector3Int(x, y, 0), grounds[tileIdx]);
+                        break;
+                    }
+                    randomNum -= template.groundTypesProbabilities[tileIdx];
+                }
+            }
+        }
+
         foreach (Building building in buildings)
         {
             if (!building.failed)
@@ -81,7 +106,7 @@ public class CityBlock
                     {
                         buildingParent = new GameObject("Building Parent " + (buildings.Count));
                         buildingParent.transform.parent = blockParent.transform;
-                        newBuilding = new Building(potentialLocations[Random.Range(0, potentialLocations.Count)], tile, curTemplate.buildingType, buildingParent);
+                        newBuilding = new Building(potentialLocations[Random.Range(0, potentialLocations.Count)], wall, curTemplate.buildingType, buildingParent);
                         newBuilding.AcceptTags(curTemplate.tags);
                         buildings.Add(newBuilding);
                     }

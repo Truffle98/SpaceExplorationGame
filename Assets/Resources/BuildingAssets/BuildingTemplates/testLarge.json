@@ -9,7 +9,8 @@
         {
             "roomType":"startRoom",
             "doorType":"single",
-            "floorType":"testFloor",
+            "floorTypes":["testFloor"],
+            "floorTypesProbabilities":[100],
             "roomMin":[8, 8],
             "roomMax":[12, 12],
             "priorityRoomsToMake":[],
@@ -29,7 +30,8 @@
         {
             "roomType":"hallway",
             "doorType":"single",
-            "floorType":"testFloor",
+            "floorTypes":["testFloor"],
+            "floorTypesProbabilities":[100],
             "roomMin":[5, 5],
             "roomMax":[15, 7],
             "priorityRoomsToMake":[],
@@ -49,7 +51,8 @@
         {
             "roomType":"lobby",
             "doorType":"single",
-            "floorType":"testFloor",
+            "floorTypes":["testFloor"],
+            "floorTypesProbabilities":[100],
             "roomMin":[5, 5],
             "roomMax":[15, 7],
             "priorityRoomsToMake":[],
@@ -69,7 +72,8 @@
         {
             "roomType":"office",
             "doorType":"single",
-            "floorType":"testFloor",
+            "floorTypes":["testFloor"],
+            "floorTypesProbabilities":[100],
             "roomMin":[4, 4],
             "roomMax":[7, 7],
             "priorityRoomsToMake":[],
@@ -89,7 +93,8 @@
         {
             "roomType":"closet",
             "doorType":"single",
-            "floorType":"testFloor",
+            "floorTypes":["testFloor"],
+            "floorTypesProbabilities":[100],
             "roomMin":[2, 2],
             "roomMax":[4, 4],
             "priorityRoomsToMake":[],
@@ -109,7 +114,8 @@
         {
             "roomType":"bathroom",
             "doorType":"single",
-            "floorType":"testFloor",
+            "floorTypes":["testFloor"],
+            "floorTypesProbabilities":[100],
             "roomMin":[3, 3],
             "roomMax":[4, 4],
             "priorityRoomsToMake":[],

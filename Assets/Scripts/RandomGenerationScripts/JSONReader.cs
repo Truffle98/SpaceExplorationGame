@@ -5,7 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class TemplateReader
 {
-
     public BuildingSetup ReadBuildingTemplate(string templateName)
     {
         var json = Resources.Load<TextAsset>("BuildingAssets/BuildingTemplates/" + templateName);
@@ -81,7 +80,8 @@ public class CityMapSetupJSON
 {
     public int width;
     public CitySectorTemplateJSON[] citySectorTemplates;
-    public string[] ensureSpawn, tags;
+    public string[] ensureSpawn, groundTiles, tags;
+    public int[] groundRanges;
 }
 
 [System.Serializable]
@@ -89,6 +89,9 @@ public class CitySectorTemplateJSON
 {
     public int ringCount;
     public RingJSON[] rings;
+    public string[] roadTiles;
+    public int[] roadTilesProbabilities;
+    public string sidewalk;
     public string[] tags;
 }
 
@@ -104,8 +107,8 @@ public class CityBlockSetupJSON
 {
     public int minBuildings;
     public BuildingTemplateJSON[] potentialBuildings;
-    public string[] enemies;
-    public int[] enemiesProbabilities, enemiesGroupCount;
+    public string[] enemies, groundTypes;
+    public int[] enemiesProbabilities, enemiesGroupCount, groundTypesProbabilities;
     public string[] tags;
 }
 
@@ -131,9 +134,9 @@ public class BuildingSetupJSON
 [System.Serializable]
 public class RoomTemplateJSON
 {
-    public string roomType, doorType, floorType;
-    public int[] roomMin, roomMax, roomObjectsProbabilities;
-    public string[] roomsToMake, smallRoomsToMake, priorityRoomsToMake;
+    public string roomType, doorType;
+    public int[] roomMin, roomMax, roomObjectsProbabilities, floorTypesProbabilities;
+    public string[] roomsToMake, smallRoomsToMake, priorityRoomsToMake, floorTypes;
     public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities, priorityRoomsToMakeProbabilities;
     public string[] roomObjects;
     public int[] roomObjectsCount;

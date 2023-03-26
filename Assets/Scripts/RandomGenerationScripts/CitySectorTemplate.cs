@@ -9,6 +9,9 @@ public class CitySectorTemplate
     public int ringCount;
     public List<List<string>> ringTemplates, priorityTemplates;
     public List<List<int>> ringTemplateLimits, priorityLimits;
+    public string[] roadTiles;
+    public int[] roadTilesProbabilities;
+    public string sidewalk;
     public string[] tags;
 
     public void AcceptJSON(CitySectorTemplateJSON templateJSON)
@@ -53,11 +56,21 @@ public class CitySectorTemplate
             priorityLimits.Add(tempLimits);
         }
 
+        roadTiles = new string[templateJSON.roadTiles.Length];
+        roadTilesProbabilities = new int[templateJSON.roadTiles.Length];
+
+        for (int i = 0; i < templateJSON.roadTiles.Length; i++)
+        {
+            roadTiles[i] = templateJSON.roadTiles[i];
+            roadTilesProbabilities[i] = templateJSON.roadTilesProbabilities[i];
+        }
+
+        sidewalk = templateJSON.sidewalk;
+
         tags = new string[templateJSON.tags.Length];
         for (int i = 0; i < templateJSON.tags.Length; i++)
         {
             tags[i] = templateJSON.tags[i];
         }
-
     }
 }

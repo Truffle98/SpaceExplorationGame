@@ -45,6 +45,7 @@ public class RandomGenerationScript : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            //Debug.Log("Ran here");
             GenerateCity(cityType, 0);
             //Debug.Log("Time taken: " + Time.deltaTime);
         }
@@ -73,13 +74,14 @@ public class RandomGenerationScript : MonoBehaviour
         // backMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), ground);
         // backMap.FloodFill(new Vector3Int(0, 0, 0), ground);
 
-        DrawBackground(template, backMap, bottomLeft, topRight);
-
         List<Vector2Int> citySectorCenters;
         citySectorCenters = GenerateCityCenters(template);
 
         CityBlock[,] cityMap = DetermineCityBlocks(template, citySectorCenters);
         Vector2Int landingZone = DetermineLandingZone(cityMap, template);
+
+        DrawBackground(template, backMap);
+        DrawRoads(template, citySectorCenters, cityMap, backMap);
 
         frontMap.SetTile(new Vector3Int(bottomLeft.x, bottomLeft.y, 0), buildingWall);
         frontMap.SetTile(new Vector3Int(topRight.x, topRight.y, 0), buildingWall);
@@ -119,6 +121,7 @@ public class RandomGenerationScript : MonoBehaviour
         {
             if (count < 5)
             {
+                Debug.Log("Remade map");
                 GenerateCity(cityType, count + 1);
             }
             else
@@ -491,35 +494,143 @@ public class RandomGenerationScript : MonoBehaviour
         return;
     }
 
-    void DrawBackground(CityMapSetup template, Tilemap backmap, Vector2 bottomLeft, Vector2 topRight)
+    void DrawBackground(CityMapSetup template, Tilemap backmap)
     {
         var offset = new Vector2(Random.Range(-200, 200), Random.Range(-200, 200));
         Vector2 curPoint;
         float noise;
 
-        TileBase[] tiles = new TileBase[3];
-        tiles[0] = Resources.Load<TileBase>("CityMapAssets/BackgroundTiles/" + "testColor1");
-        tiles[1] = Resources.Load<TileBase>("CityMapAssets/BackgroundTiles/" + "testColor2");
-        tiles[2] = Resources.Load<TileBase>("CityMapAssets/BackgroundTiles/" + "testColor3");
+        int totalWidth = template.width * blockLength + (template.width + 1) * roadLength;
+
+        var bottomLeft = new Vector2Int(-totalWidth / 2, -totalWidth / 2);
+        var topRight = new Vector2Int(totalWidth / 2, totalWidth / 2);
+
+        TileBase[] tiles = new TileBase[template.groundTiles.Length];
+        for (int i = 0; i < template.groundTiles.Length; i++)
+        {
+            tiles[i] = Resources.Load<TileBase>("Tiles/" + template.groundTiles[i]);
+        }
 
         for (int i = (int)bottomLeft.x; i <= topRight.x; i++)
         {
             for (int j = (int)bottomLeft.y; j <= topRight.y; j++)
             {
                 curPoint = new Vector2(i / 50f, j / 50f) + offset;
-                noise = Mathf.PerlinNoise(curPoint.x, curPoint.y);
+                noise = (int)(Mathf.PerlinNoise(curPoint.x, curPoint.y) * 100);
 
-                if (noise >= 0.65f)
+                for (int k = 0; k < tiles.Length; k++)
                 {
-                    backMap.SetTile(new Vector3Int(i, j, 0), tiles[0]);
+                    if (noise < template.groundRanges[k])
+                    {
+                        backMap.SetTile(new Vector3Int(i, j, 0), tiles[k]);
+                        break;
+                    }
                 }
-                else if (noise <= 0.35f)
+            }
+        }
+    }
+
+    void DrawRoads(CityMapSetup template, List<Vector2Int> centers, CityBlock[,] cityMap, Tilemap backMap)
+    {
+        Vector2Int topRightIdx, bottomLeftIdx, centerTile, curDirection, tileAmounts, fillDirection, startCorner, endCorner, bottomLeftCorner, topRightCorner;
+        float curAngle, tileAmountAngle, fillAngle;
+        TileBase[] roadTiles;
+        TileBase sidewalk;
+        int randomNum;
+
+        int totalWidth = template.width * blockLength + (template.width + 1) * roadLength;
+
+        var bottomLeft = new Vector2Int(-totalWidth / 2, -totalWidth / 2);
+        var topRight = new Vector2Int(totalWidth / 2, totalWidth / 2);
+
+        Vector2Int nullVector = new Vector2Int(-1,-1);
+        for (int i = centers.Count - 1; i >= 0; i--)
+        {
+            if (centers[i] == nullVector)
+            {
+                continue;
+            }
+
+            roadTiles = new TileBase[template.citySectorTemplates[i].roadTiles.Length];
+            for (int j = 0; j < template.citySectorTemplates[i].roadTiles.Length; j++)
+            {
+                roadTiles[j] = Resources.Load<TileBase>("Tiles/" + template.citySectorTemplates[i].roadTiles[j]);
+            }
+            sidewalk = Resources.Load<TileBase>("Tiles/" + template.citySectorTemplates[i].sidewalk);
+
+            bottomLeftIdx = new Vector2Int(centers[i].x - template.citySectorTemplates[i].ringCount + 1, centers[i].y - template.citySectorTemplates[i].ringCount + 1);
+            topRightIdx = new Vector2Int(centers[i].x + template.citySectorTemplates[i].ringCount - 1, centers[i].y + template.citySectorTemplates[i].ringCount - 1);
+
+            for (int j = bottomLeftIdx.x; j <= topRightIdx.x; j++)
+            {
+                for (int k = bottomLeftIdx.y; k <= topRightIdx.y; k++)
                 {
-                    backMap.SetTile(new Vector3Int(i, j, 0), tiles[2]);
-                }
-                else
-                {
-                    backMap.SetTile(new Vector3Int(i, j, 0), tiles[1]);
+                    if (cityMap[j,k] == null)
+                    {
+                        continue;
+                    }
+
+                    centerTile = new Vector2Int((int)(bottomLeft.x + roadLength * (k + 1) + blockLength * (k + 0.5f)), (int)(bottomLeft.y + roadLength * (j + 1) + blockLength * (j + 0.5f)));
+                    //Debug.Log("Center tile: " + centerTile);
+                    
+                    for (int l = 0; l < 4; l++)
+                    {
+                        curAngle = l * (Mathf.PI / 2) + (Mathf.PI) / 4;
+                        curDirection = new Vector2Int((int)Mathf.Round(Mathf.Cos(curAngle) / 0.707f), (int)Mathf.Round(Mathf.Sin(curAngle) / 0.707f));
+
+                        //Theres another -1 in the y values for when cos > 0, not sure why, nvm I think they both just need to back off from the building
+                        tileAmountAngle = l * (Mathf.PI / 2) + (Mathf.PI);
+                        tileAmounts = new Vector2Int((int)Mathf.Round(Mathf.Abs(Mathf.Cos(tileAmountAngle) * (blockLength + roadLength) + Mathf.Sin(tileAmountAngle) * (roadLength - 4))), 
+                                                     (int)Mathf.Round(Mathf.Abs(Mathf.Cos(tileAmountAngle) * (roadLength - 4) + Mathf.Sin(tileAmountAngle) * (blockLength + roadLength))));
+
+                        fillAngle = l * (Mathf.PI / 2) + (5 * Mathf.PI / 4f);
+                        fillDirection = new Vector2Int((int)Mathf.Round(Mathf.Cos(fillAngle) / 0.707f), (int)Mathf.Round(Mathf.Sin(fillAngle) / 0.707f));
+
+                        startCorner = new Vector2Int(centerTile.x + curDirection.x * (blockLength / 2 + roadLength - 2), centerTile.y + curDirection.y * (blockLength / 2 + roadLength - 2));
+                        endCorner = new Vector2Int(startCorner.x + tileAmounts.x * fillDirection.x, startCorner.y + tileAmounts.y * fillDirection.y);
+
+                        bottomLeftCorner = new Vector2Int(Mathf.Min(startCorner.x, endCorner.x), Mathf.Min(startCorner.y, endCorner.y));
+                        topRightCorner = new Vector2Int(Mathf.Max(startCorner.x, endCorner.x), Mathf.Max(startCorner.y, endCorner.y));
+
+                        for (int x = bottomLeftCorner.x; x <= topRightCorner.x; x++)
+                        {
+                            for (int y = bottomLeftCorner.y; y <= topRightCorner.y; y++)
+                            {
+                                randomNum = Random.Range(0, 100);
+                                for (int tileIdx = 0; tileIdx < roadTiles.Length; tileIdx++)
+                                {
+                                    if (randomNum < template.citySectorTemplates[i].roadTilesProbabilities[tileIdx])
+                                    {
+                                        backMap.SetTile(new Vector3Int(x, y, 0), roadTiles[tileIdx]);
+                                        break;
+                                    }
+                                    randomNum -= template.citySectorTemplates[i].roadTilesProbabilities[tileIdx];
+                                }
+                            }
+                        }
+
+                        //Sidewalk generation
+                        startCorner -= new Vector2Int(curDirection.x * (roadLength - 3), curDirection.y * (roadLength - 3));
+
+                        fillAngle = l * (Mathf.PI / 2) + (Mathf.PI / 2f);
+                        //fillDirection = new Vector2Int((int)Mathf.Round(Mathf.Cos(fillAngle) / 0.707f), (int)Mathf.Round(Mathf.Sin(fillAngle) / 0.707f));
+
+                        tileAmounts = new Vector2Int((int)Mathf.Round(Mathf.Cos(tileAmountAngle) * (blockLength + 1)), 
+                                                     (int)Mathf.Round(Mathf.Sin(tileAmountAngle) * (blockLength + 1)));
+
+                        endCorner = startCorner + tileAmounts;
+                        
+                        bottomLeftCorner = new Vector2Int(Mathf.Min(startCorner.x, endCorner.x), Mathf.Min(startCorner.y, endCorner.y));
+                        topRightCorner = new Vector2Int(Mathf.Max(startCorner.x, endCorner.x), Mathf.Max(startCorner.y, endCorner.y));
+
+                        for (int x = bottomLeftCorner.x; x <= topRightCorner.x; x++)
+                        {
+                            for (int y = bottomLeftCorner.y; y <= topRightCorner.y; y++)
+                            {
+                                backMap.SetTile(new Vector3Int(x, y, 0), sidewalk);
+                            }
+                        }
+                    }
                 }
             }
         }

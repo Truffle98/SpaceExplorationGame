@@ -1,6 +1,8 @@
 {
+    "width": 7,
+    "groundTiles":["testColor1", "testColor2", "testColor3"],
+    "groundRanges":[35, 65, 100],
 
-    "width": 11,
     "citySectorTemplates":[
         {
             "ringCount": 2,
@@ -19,6 +21,9 @@
                     "limits":[2, 1, 3]
                 }
             ],
+            "roadTiles":["roadTile1", "roadTile2"],
+            "roadTilesProbabilities":[75, 25],
+            "sidewalk":"sidewalk",
             "tags":[]
         }
     ],

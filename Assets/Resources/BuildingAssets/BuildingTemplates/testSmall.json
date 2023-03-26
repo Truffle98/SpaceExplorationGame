@@ -9,7 +9,8 @@
         {
             "roomType":"startRoom",
             "doorType":"single",
-            "floorType":"testFloor",
+            "floorTypes":["testFloor"],
+            "floorTypesProbabilities":[100],
             "roomMin":[8, 8],
             "roomMax":[8, 8],
             "priorityRoomsToMake":[],

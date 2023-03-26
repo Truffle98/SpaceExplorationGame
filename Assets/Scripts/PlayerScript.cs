@@ -22,28 +22,11 @@ public class PlayerScript : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftShift) && sprintTime < maxCooldown && cooldownTime == 0)
-        {
-            speed = sprintingSpeed;
-            sprintTime++;
-            if (sprintTime>maxCooldown-1)
-            {
-                cooldownTime = maxCooldown;
-            }
-        } else {
-            speed = baseSpeed;
-            sprintTime = 0;
-            if (cooldownTime > 0)
-            {
-                cooldownTime--;
-            }
-        }
         TurnPlayer();
         RaycastVision();
         MovePlayer();
-        //MoveCamera();
+        MoveCamera();
         CheckInteract();
-        cam.transform.position = transform.position - new Vector3(0,0,10);
     }
 
     void TurnPlayer()
@@ -81,6 +64,23 @@ public class PlayerScript : MonoBehaviour
 
     void MovePlayer()
     {
+        if (Input.GetKey(KeyCode.LeftShift) && sprintTime < maxCooldown && cooldownTime == 0)
+        {
+            speed = sprintingSpeed;
+            sprintTime++;
+            if (sprintTime>maxCooldown-1)
+            {
+                cooldownTime = maxCooldown;
+            }
+        } else {
+            speed = baseSpeed;
+            sprintTime = 0;
+            if (cooldownTime > 0)
+            {
+                cooldownTime--;
+            }
+        }
+
         //body.velocity = new Vector2(Input.GetAxis("Horizontal") * speed, Input.GetAxis("Vertical") * speed);
         Vector2 move = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         if (move.magnitude > 1.0f)
@@ -118,7 +118,26 @@ public class PlayerScript : MonoBehaviour
 
     void MoveCamera()
     {
-        cam.transform.position = transform.position + new Vector3(Mathf.Cos(angle) * 10, Mathf.Sin(angle) * 20, -10);
+        Vector3 desiredLocation = transform.position - new Vector3(0,0,10);
+
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            Vector2 cursorDifference = (Input.mousePosition / new Vector2(Screen.width / 2f, Screen.height / 2f) - new Vector2(1, 1));
+            
+            desiredLocation += new Vector3(10f * cursorDifference.x, 10f * cursorDifference.y, 0);
+        }
+
+        Vector3 desiredMove = (desiredLocation - cam.transform.position) * 7f * Time.deltaTime;
+        if (desiredMove.x != 0 && Mathf.Abs(desiredMove.x) < 0.1f * Time.deltaTime)
+        {
+            desiredMove.x = (desiredLocation - cam.transform.position).x;
+        }
+        if (desiredMove.y != 0 && Mathf.Abs(desiredMove.y) < 0.1f * Time.deltaTime)
+        {
+            desiredMove.y = (desiredLocation - cam.transform.position).y;
+        }
+
+        cam.transform.position += desiredMove;
     }
 
     void RaycastVision()

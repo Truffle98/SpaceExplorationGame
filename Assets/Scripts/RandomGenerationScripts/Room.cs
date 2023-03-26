@@ -26,13 +26,27 @@ public class Room
         //Debug.Log(bounds.min);
         //Debug.Log(bounds.max);
         frontMap.BoxFill(Vector3Int.FloorToInt(bounds.center), null, bounds.min.x + 1, bounds.min.y + 1, bounds.max.x - 1, bounds.max.y - 1);
-        TileBase floor = Resources.Load<TileBase>("RoomAssets/Floors/" + template.floorType);
+        TileBase[] floors = new TileBase[template.floorTypes.Length];
+        for (int i = 0; i < template.floorTypes.Length; i++)
+        {
+            floors[i] = Resources.Load<TileBase>("RoomAssets/Floors/" + template.floorTypes[i]);
+        }
 
+        int randomNum;
         for (int i = bounds.min.x; i <= bounds.max.x; i++)
         {
             for (int j = bounds.min.y; j <= bounds.max.y; j++)
             {
-                backMap.SetTile(new Vector3Int(i, j, 0), floor);
+                randomNum = Random.Range(0, 100);
+                for (int tileIdx = 0; tileIdx < floors.Length; tileIdx++)
+                {
+                    if (randomNum < template.floorTypesProbabilities[tileIdx])
+                    {
+                        backMap.SetTile(new Vector3Int(i, j, 0), floors[tileIdx]);
+                        break;
+                    }
+                    randomNum -= template.floorTypesProbabilities[tileIdx];
+                }
             }
         }
 

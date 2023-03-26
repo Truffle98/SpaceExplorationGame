@@ -12,9 +12,9 @@ public class RoomSetup
 {
 
     public Vector2Int minSize, maxSize;
-    public string roomType, doorType, floorType;
-    public string[] roomsToMake, smallRoomsToMake, priorityRoomsToMake;
-    public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities, priorityRoomsToMakeProbabilities;
+    public string roomType, doorType;
+    public string[] roomsToMake, smallRoomsToMake, priorityRoomsToMake, floorTypes;
+    public int[] roomsToMakeProbabilities, smallRoomsToMakeProbabilities, priorityRoomsToMakeProbabilities, floorTypesProbabilities;
     public string[] roomObjects, enemies;
     public int[] roomObjectsProbabilities, roomObjectsCount, enemiesProbabilities;
     public string[] tags;
@@ -23,9 +23,17 @@ public class RoomSetup
     {
         roomType = templateJSON.roomType;
         doorType = templateJSON.doorType;
-        floorType = templateJSON.floorType;
+
         minSize = new Vector2Int(templateJSON.roomMin[0], templateJSON.roomMin[1]);
         maxSize = new Vector2Int(templateJSON.roomMax[0], templateJSON.roomMax[1]);
+
+        floorTypes = new string[templateJSON.floorTypes.Length];
+        floorTypesProbabilities = new int[templateJSON.floorTypes.Length];
+        for (int i = 0; i < templateJSON.floorTypes.Length; i++)
+        {
+            floorTypes[i] = templateJSON.floorTypes[i];
+            floorTypesProbabilities[i] = templateJSON.floorTypesProbabilities[i];
+        }
         
         priorityRoomsToMake = new string[templateJSON.priorityRoomsToMake.Length];
         priorityRoomsToMakeProbabilities = new int[templateJSON.priorityRoomsToMake.Length];
@@ -70,7 +78,6 @@ public class RoomSetup
             enemies[i] = templateJSON.enemies[i];
             enemiesProbabilities[i] = templateJSON.enemiesProbabilities[i];
         }
-
 
         tags = new string[templateJSON.tags.Length];
         for (int i = 0; i < templateJSON.tags.Length; i++)

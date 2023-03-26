@@ -1,6 +1,8 @@
 {
-
     "width": 9,
+    "groundTiles":["testColor1", "testColor2", "testColor3"],
+    "groundRanges":[35, 65, 100],
+
     "citySectorTemplates":[
         {
             "ringCount": 1,

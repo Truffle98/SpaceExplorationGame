@@ -3,6 +3,8 @@
     "enemies":[],
     "enemiesProbabilities":[],
     "enemiesGroupCount":[],
+    "groundTypes":["roadTile1"],
+    "groundTypesProbabilities":[100],
 
     "potentialBuildings":[
         {
