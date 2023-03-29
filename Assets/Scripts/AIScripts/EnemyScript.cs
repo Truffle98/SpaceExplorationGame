@@ -234,6 +234,10 @@ public class EnemyScript : MonoBehaviour
 
     void CheckPathForDoors()
     {
+        if (agent.pathPending)
+        {
+            return;
+        }
         var corners = agent.path.corners;
 
         //Debug.Log(corners.Length);

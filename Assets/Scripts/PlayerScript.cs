@@ -10,6 +10,7 @@ public class PlayerScript : MonoBehaviour
     private Rigidbody2D body;
     private List<GameObject> newVisible = new List<GameObject>(), oldVisible = new List<GameObject>(), 
     inVision = new List<GameObject>(), oldInVision = new List<GameObject>();
+    public FOVScript[] fovs;
 
     void Start()
     {
@@ -116,36 +117,50 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
+    Vector3 curOffset = new Vector3(0,0,0);
     void MoveCamera()
     {
-        Vector3 desiredLocation = transform.position - new Vector3(0,0,10);
+        Vector3 desiredOffset;
+        Vector3 cameraDiff = cam.transform.position - transform.position;
 
         if (Input.GetKey(KeyCode.LeftControl))
         {
             Vector2 cursorDifference = (Input.mousePosition / new Vector2(Screen.width / 2f, Screen.height / 2f) - new Vector2(1, 1));
             
-            desiredLocation += new Vector3(10f * cursorDifference.x, 10f * cursorDifference.y, 0);
+            desiredOffset = new Vector3(10f * cursorDifference.x, 10f * cursorDifference.y, 0);
+        }
+        else
+        {
+            desiredOffset = new Vector3(0,0,0);
         }
 
-        Vector3 desiredMove = (desiredLocation - cam.transform.position) * 7f * Time.deltaTime;
+        Vector3 desiredMove = (desiredOffset - curOffset) * 3f * Time.deltaTime;
         if (desiredMove.x != 0 && Mathf.Abs(desiredMove.x) < 0.1f * Time.deltaTime)
         {
-            desiredMove.x = (desiredLocation - cam.transform.position).x;
+            desiredMove.x = (desiredOffset - curOffset).x;
         }
         if (desiredMove.y != 0 && Mathf.Abs(desiredMove.y) < 0.1f * Time.deltaTime)
         {
-            desiredMove.y = (desiredLocation - cam.transform.position).y;
+            desiredMove.y = (desiredOffset - curOffset).y;
         }
+        curOffset += desiredMove;
+        curOffset.z = -10;
 
-        cam.transform.position += desiredMove;
+        cam.transform.position = transform.position + curOffset;
     }
 
     void RaycastVision()
     {
+        foreach (FOVScript fov in fovs)
+        {
+            fov.UpdateFOV();
+        }
+
+        /*
         float lineDistance = 50;
         float spread = 0.025f;
         int numLines = 25;
-
+        
         inVision.Clear();
         for (int i = 0; i < numLines; i++)
         {
@@ -160,7 +175,7 @@ public class PlayerScript : MonoBehaviour
                     if (hit.collider.tag == "Wall")
                     {
                         break;
-                    } 
+                    }
                     else if (hit.collider.tag == "NeedsLOS")
                     {
                         var vs = hit.collider.gameObject.GetComponent<VisibilityScript>();
@@ -176,6 +191,7 @@ public class PlayerScript : MonoBehaviour
             var rayLine = new Vector2(lineDistance * Mathf.Cos(angle+adjust), lineDistance * Mathf.Sin(angle+adjust));
             Debug.DrawRay(transform.position, rayLine, Color.red);
         }
+        
 
         // Ray casting for behind
         numLines = 25;
@@ -218,6 +234,7 @@ public class PlayerScript : MonoBehaviour
         {
             oldInVision.Add(go);
         }
+        */
     }
 
     void CheckInteract()

@@ -55,7 +55,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: e992f2b78df7f7a439b5a8f70dd3d0de, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -103,8 +103,10 @@ MonoBehaviour:
   orientation: 0
   openAngle: 0
   closedAngle: 0
-  open: 0
+  turningPoint: {x: 0, y: 0, z: 0}
   reversed: 0
+  inUse: 0
+  open: 0
 --- !u!61 &3053410684342879916
 BoxCollider2D:
   m_ObjectHideFlags: 0

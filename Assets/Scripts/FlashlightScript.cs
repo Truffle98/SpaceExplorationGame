@@ -55,6 +55,7 @@ public class FlashlightScript : MonoBehaviour
     // Checks if light is turned on. If true, the flashlight looks for rotation.
     void DoFlashlightRaycasting()
     {
+        /*
         if (lightOn)
         {
             Raycast(); // Only raycast when the light is on
@@ -69,11 +70,13 @@ public class FlashlightScript : MonoBehaviour
             }
             newVisible.Clear();
         }
+        */
     }
     
     // Ray casts the flashlight
     void Raycast()
     {
+        /*
         angle = playerScript.angle;
         
         float lineDistance = visionLength;
@@ -126,5 +129,6 @@ public class FlashlightScript : MonoBehaviour
         {
             oldVisible.Add(go);
         }
+        */
     }
 }

@@ -10,7 +10,7 @@ public class DoorScript : MonoBehaviour
     private float orientationAngle, remainingTurnAngle = 0, totalTurnAngle = 90, lockDuration;
     private Vector2Int turningPointDirection;
     public Vector3 turningPoint;
-    public bool reversed;
+    public bool reversed, locked;
     [HideInInspector]
     public bool inUse = false, open = false;
 
