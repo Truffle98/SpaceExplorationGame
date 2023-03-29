@@ -53,7 +53,15 @@ public class ItemGrid : MonoBehaviour
             return false;
         }
 
-        if (overlapItem) { ClearItem(overlapItem); }
+        if (overlapItem) {
+            if (overlapItem.itemData.itemName == inventoryItem.itemData.itemName) {
+                overlapItem.IncreaseCount();
+                overlapItem = null;
+                Destroy(inventoryItem.gameObject);
+                return true;
+            }
+            ClearItem(overlapItem); 
+        }
 
         RectTransform rectTransform = inventoryItem.GetComponent<RectTransform>();
         rectTransform.SetParent(this.rectTransform);
@@ -77,8 +85,8 @@ public class ItemGrid : MonoBehaviour
         if (!actualItems.Contains(inventoryItem))
         {
             actualItems.Add(inventoryItem);
+            inventoryItem.grid = gameObject;
         }
-        inventoryItem.grid = gameObject;
         return true;
     }
 
@@ -116,7 +124,7 @@ public class ItemGrid : MonoBehaviour
         return true;
     }
 
-    public InventoryItem PickUpItem(int xPos, int yPos)
+    public InventoryItem PickUpItem(int xPos, int yPos, bool isAll)
     {
         if (xPos < 0 || yPos < 0) { return null; }
         
@@ -124,8 +132,17 @@ public class ItemGrid : MonoBehaviour
 
         if (!item) { return null; }
 
-        ClearItem(item);
-        actualItems.Remove(item);
+        if (isAll || item.gameObject.transform.childCount == 0) {
+            ClearItem(item);
+            actualItems.Remove(item);
+        } else if (item.count == 2) {
+            item.DecreaseCount();
+            item = Instantiate(item);
+            Destroy(item.gameObject.transform.GetChild(0).gameObject);
+        } else {
+            item.DecreaseCount();
+            item = Instantiate(item);
+        }
 
         return item;
     }
@@ -228,9 +245,16 @@ public class ItemGrid : MonoBehaviour
         {
             for (int y = 0; y < this.height; y++)
             {
-                if (IsSpace(x, y, 1, 1))
+                if (IsSpace(x, y, 1, 1) && itemToMove.itemData.isActivateable)
                 {
+                    // if (itemToMove.count > 1) {
+                    //     itemToMove.DecreaseCount();
+                    //     InventoryItem item = Instantiate(itemToMove);
+                    //     Destroy(item.gameObject.transform.GetChild(0).gameObject);
+                    //     PlaceActiveItem(item, x, y, x, y, ref overlapItemFake);
+                    // } else {
                     PlaceActiveItem(itemToMove, x, y, x, y, ref overlapItemFake);
+                    // }
                     return true;
                 }
             }

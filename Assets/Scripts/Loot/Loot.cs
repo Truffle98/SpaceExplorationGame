@@ -15,9 +15,18 @@ public class Loot : MonoBehaviour
         inventoryItems = new InventoryItem[lootGrid.width, lootGrid.height];
         foreach (ItemData item in loot.items)
         {
-            InventoryItem inventoryItem = Instantiate(loot.item).GetComponent<InventoryItem>();
+            InventoryItem inventoryItem = IsStackable(item);
+            if (inventoryItem != null) {
+                inventoryItem.IncreaseCount();
+                continue;
+            }
+            
+            inventoryItem = Instantiate(loot.item).GetComponent<InventoryItem>();
             item.width = item.actualWidth;
             item.height = item.actualHeight;
+            if (IsStackable(item)) {
+                
+            }
             inventoryItem.Set(item);
             FindPlaceToPut(inventoryItem);
         }
@@ -76,5 +85,14 @@ public class Loot : MonoBehaviour
         inventoryItem.onGridPositionX = xPos;
         inventoryItem.onGridPositionY = yPos;
         actualItems.Add(inventoryItem);
+    }
+
+    private InventoryItem IsStackable(ItemData itemData) {
+        foreach (InventoryItem item in actualItems) {
+            if (item.itemData.itemName == itemData.itemName) {
+                return item;
+            }
+        }
+        return null;
     }
 }

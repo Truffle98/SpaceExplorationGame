@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class InventoryController : MonoBehaviour
 {
@@ -15,10 +17,17 @@ public class InventoryController : MonoBehaviour
     public InventoryHighlight inventoryHighlight;
     public ItemCardHandler itemCard;
     public GameObject inventoryHandler;
+    public TMP_Text helperText;
+
+    void Start()
+    {
+        helperText.CrossFadeAlpha(0.0f, 0.0f, false);
+    }
 
     void Update()
     {
         DragItemIcon();
+        CheckActiveItemInputs();
 
         if (inventory == null)
         {
@@ -32,9 +41,66 @@ public class InventoryController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             LeftMouseButtonPress();
-        } else if (Input.GetMouseButtonDown(1))
+        }
+        else if (Input.GetMouseButtonDown(1))
         {
             RightMouseButtonPress();
+        }
+    }
+
+    private void CheckActiveItemInputs()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            if (activeItems.inventoryItems[0, 0] != null)
+            {
+                activeItems.inventoryItems[0, 0].ExecuteAction();
+            }
+            else
+            {
+                helperText.text = "No item in active item slot 1";
+                helperText.CrossFadeAlpha(1f, 0f, false);
+                helperText.CrossFadeAlpha(0.0f, 1f, false);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if (activeItems.inventoryItems[0, 1] != null)
+            {
+                activeItems.inventoryItems[0, 1].ExecuteAction();
+            }
+            else
+            {
+                helperText.text = "No item in active item slot 2";
+                helperText.CrossFadeAlpha(1f, 0f, false);
+                helperText.CrossFadeAlpha(0.0f, 1f, false);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            if (activeItems.inventoryItems[0, 2] != null)
+            {
+                activeItems.inventoryItems[0, 2].ExecuteAction();
+            }
+            else
+            {
+                helperText.text = "No item in active item slot 3";
+                helperText.CrossFadeAlpha(1f, 0f, false);
+                helperText.CrossFadeAlpha(0.0f, 1f, false);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            if (activeItems.inventoryItems[0, 3] != null)
+            {
+                activeItems.inventoryItems[0, 3].ExecuteAction();
+            }
+            else
+            {
+                helperText.text = "No item in active item slot 4";
+                helperText.CrossFadeAlpha(1f, 0f, false);
+                helperText.CrossFadeAlpha(0.0f, 1f, false);
+            }
         }
     }
 
@@ -45,8 +111,7 @@ public class InventoryController : MonoBehaviour
         {
             if (inventory.gameObject.name == "Inventory")
             {
-                itemToMove = mainInventory.PickUpItem(clickPosition.x, clickPosition.y);
-
+                itemToMove = mainInventory.PickUpItem(clickPosition.x, clickPosition.y, true);
                 itemToMove.itemData.width = 1;
                 itemToMove.itemData.height = 1;
                 itemToMove.Set(itemToMove.itemData);
@@ -59,7 +124,7 @@ public class InventoryController : MonoBehaviour
             }
             else if (inventory.gameObject.name == "Loot Inventory")
             {
-                itemToMove = otherInventory.PickUpItem(clickPosition.x, clickPosition.y);
+                itemToMove = otherInventory.PickUpItem(clickPosition.x, clickPosition.y, true);
                 placed = mainInventory.FindPlaceToPut(itemToMove);
                 if (!placed)
                 {
@@ -68,7 +133,7 @@ public class InventoryController : MonoBehaviour
             }
             else if (inventory.gameObject.name == "Active Items")
             {
-                itemToMove = activeItems.PickUpItem(clickPosition.x, clickPosition.y);
+                itemToMove = activeItems.PickUpItem(clickPosition.x, clickPosition.y, true);
 
                 itemToMove.itemData.width = itemToMove.itemData.actualWidth;
                 itemToMove.itemData.height = itemToMove.itemData.actualHeight;
@@ -82,6 +147,8 @@ public class InventoryController : MonoBehaviour
             }
         }
     }
+
+
 
     private void HandleHighlight()
     {
@@ -161,7 +228,11 @@ public class InventoryController : MonoBehaviour
 
     private void PickUpItem(Vector2Int position)
     {
-        selectedItem = inventory.PickUpItem(position.x, position.y);
+        if (Input.GetKey(KeyCode.LeftShift)) {
+            selectedItem = inventory.PickUpItem(position.x, position.y, true);
+        } else {
+            selectedItem = inventory.PickUpItem(position.x, position.y, false);
+        }
         if (selectedItem)
         {
             rectTransform = selectedItem.GetComponent<RectTransform>();

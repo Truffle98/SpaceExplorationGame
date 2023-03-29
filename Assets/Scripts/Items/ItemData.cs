@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,4 +12,10 @@ public class ItemData : ScriptableObject
     public int actualHeight = 1;
     public string itemName;
     public Sprite itemIcon;
+    public bool isActivateable;
+
+    public void ExecuteAction()
+    {
+        throw new NotImplementedException();
+    }
 }
