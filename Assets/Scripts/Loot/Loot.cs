@@ -17,7 +17,7 @@ public class Loot : MonoBehaviour
         {
             InventoryItem inventoryItem = IsStackable(item);
             if (inventoryItem != null) {
-                inventoryItem.IncreaseCount();
+                inventoryItem.IncreaseCount(1);
                 continue;
             }
             

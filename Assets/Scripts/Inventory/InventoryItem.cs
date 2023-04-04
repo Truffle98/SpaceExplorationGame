@@ -43,7 +43,7 @@ public class InventoryItem : MonoBehaviour
         itemData.ExecuteAction();
     }
 
-    public void IncreaseCount()
+    public void IncreaseCount(int increment)
     {
         TMP_Text text = null;
         if (this.count == 1) {
@@ -51,7 +51,7 @@ public class InventoryItem : MonoBehaviour
         } else {
             text = gameObject.transform.GetChild(0).gameObject.GetComponent<TMP_Text>();
         }
-        this.count++;
+        this.count += increment;
         text.text = this.count.ToString();
     }
 
@@ -61,8 +61,9 @@ public class InventoryItem : MonoBehaviour
         if (count == 1) {
             Destroy(gameObject.transform.GetChild(0).gameObject);
             return;
+        } else if (count > 1) {
+            TMP_Text text = gameObject.transform.GetChild(0).gameObject.GetComponent<TMP_Text>();
+            text.text = this.count.ToString();
         }
-        TMP_Text text = gameObject.transform.GetChild(0).gameObject.GetComponent<TMP_Text>();
-        text.text = this.count.ToString();
     }
 }

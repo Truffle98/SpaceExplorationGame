@@ -6,7 +6,7 @@ using TMPro;
 
 public class InventoryController : MonoBehaviour
 {
-    [HideInInspector]
+    // [HideInInspector]
     public ItemGrid inventory, otherInventory, activeItems;
     public ItemGrid mainInventory;
     [HideInInspector]
@@ -106,6 +106,18 @@ public class InventoryController : MonoBehaviour
 
     private void RightMouseButtonPress()
     {
+        Vector2Int clickPosition = inventory.GetTilePosition(Input.mousePosition);
+        Vector2Int placePosition = GetTiledGridPosition();
+        if (selectedItem == null || (selectedItem && inventory.ItemAt(placePosition.x, placePosition.y) && inventory.ItemAt(placePosition.x, placePosition.y).itemData.itemName == selectedItem.itemData.itemName))
+        {
+            PickUpItem(placePosition, false);
+        } else {
+            PlaceItem(placePosition, clickPosition);
+        }
+    }
+
+    private void AutoPlaceItem()
+    {
         Vector2Int clickPosition = GetTiledGridPosition();
         if (inventory.ItemAt(clickPosition.x, clickPosition.y) != null)
         {
@@ -119,6 +131,9 @@ public class InventoryController : MonoBehaviour
                 placed = activeItems.FindPlaceToPutActiveItems(itemToMove);
                 if (!placed)
                 {
+                    itemToMove.itemData.width = itemToMove.itemData.actualWidth;
+                    itemToMove.itemData.height = itemToMove.itemData.actualHeight;
+                    itemToMove.Set(itemToMove.itemData);
                     placed = mainInventory.FindPlaceToPut(itemToMove);
                 }
             }
@@ -147,8 +162,6 @@ public class InventoryController : MonoBehaviour
             }
         }
     }
-
-
 
     private void HandleHighlight()
     {
@@ -191,7 +204,11 @@ public class InventoryController : MonoBehaviour
         Vector2Int placePosition = GetTiledGridPosition();
         if (selectedItem == null)
         {
-            PickUpItem(placePosition);
+            if (Input.GetKey(KeyCode.LeftShift)) {
+                AutoPlaceItem();
+            } else {
+                PickUpItem(placePosition, true);
+            }
         }
         else
         {
@@ -226,13 +243,19 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    private void PickUpItem(Vector2Int position)
-    {
-        if (Input.GetKey(KeyCode.LeftShift)) {
-            selectedItem = inventory.PickUpItem(position.x, position.y, true);
-        } else {
-            selectedItem = inventory.PickUpItem(position.x, position.y, false);
+    private void PlaceOneItem(Vector2Int placePosition, Vector2Int clickPosition) {
+        bool stacked = inventory.StackItem(selectedItem, placePosition.x, placePosition.y, clickPosition.x, clickPosition.y);
+        if (stacked) {
+            selectedItem.DecreaseCount();
+            if (selectedItem.count == 0) {
+                Destroy(selectedItem.gameObject);
+            }
         }
+    }
+
+    private void PickUpItem(Vector2Int position, bool all)
+    {
+        selectedItem = inventory.PickUpItem(position.x, position.y, all, ref selectedItem);
         if (selectedItem)
         {
             rectTransform = selectedItem.GetComponent<RectTransform>();

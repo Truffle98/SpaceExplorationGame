@@ -55,7 +55,7 @@ public class ItemGrid : MonoBehaviour
 
         if (overlapItem) {
             if (overlapItem.itemData.itemName == inventoryItem.itemData.itemName) {
-                overlapItem.IncreaseCount();
+                overlapItem.IncreaseCount(inventoryItem.count);
                 overlapItem = null;
                 Destroy(inventoryItem.gameObject);
                 return true;
@@ -88,6 +88,28 @@ public class ItemGrid : MonoBehaviour
             inventoryItem.grid = gameObject;
         }
         return true;
+    }
+
+    public bool StackItem(InventoryItem inventoryItem, int xPos, int yPos, int clickX, int clickY)
+    {
+        RectTransform rectTransform = inventoryItem.GetComponent<RectTransform>();
+        rectTransform.SetParent(this.rectTransform);
+
+        InventoryItem item = ItemAt(xPos, yPos);
+        if (item) {
+            if (item.itemData.itemName == inventoryItem.itemData.itemName) {
+                item.IncreaseCount(1);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            InventoryItem newItem = Instantiate(inventoryItem);
+            newItem.Set(newItem.itemData);
+            Destroy(newItem.gameObject.transform.GetChild(0).gameObject);
+            PlaceItem(newItem, xPos, yPos, clickX, clickY, ref overlapItemFake);
+            return true;
+        }
     }
 
     public bool PlaceActiveItem(InventoryItem inventoryItem, int xPos, int yPos, int clickX, int clickY, ref InventoryItem overlapItem)
@@ -132,16 +154,39 @@ public class ItemGrid : MonoBehaviour
 
         if (!item) { return null; }
 
-        if (isAll || item.gameObject.transform.childCount == 0) {
+        ClearItem(item);
+        actualItems.Remove(item);
+
+        return item;
+    }
+
+    public InventoryItem PickUpItem(int xPos, int yPos, bool isAll, ref InventoryItem heldItem) // something is wrong with the ref. probably turning null and fucking everything up
+    {
+        if (xPos < 0 || yPos < 0) { return null; }
+        
+        InventoryItem item = inventoryItems[xPos, yPos];
+
+        if (!item) { return null; }
+
+        if (isAll || (item.count == 1 && !heldItem)) {
             ClearItem(item);
             actualItems.Remove(item);
-        } else if (item.count == 2) {
+        } else if (!heldItem) {
             item.DecreaseCount();
             item = Instantiate(item);
+            item.Set(item.itemData);
             Destroy(item.gameObject.transform.GetChild(0).gameObject);
-        } else {
+        } else if (item.itemData.itemName == heldItem.itemData.itemName) {
             item.DecreaseCount();
-            item = Instantiate(item);
+            if (item.count == 0) {
+                ClearItem(item);
+                actualItems.Remove(item);
+                Destroy(item.gameObject);
+            }
+            heldItem.IncreaseCount(1);
+            return heldItem;
+        } else {
+            return heldItem;
         }
 
         return item;
