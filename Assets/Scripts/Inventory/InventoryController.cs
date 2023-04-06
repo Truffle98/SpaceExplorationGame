@@ -123,23 +123,23 @@ public class InventoryController : MonoBehaviour
         {
             if (inventory.gameObject.name == "Inventory")
             {
-                itemToMove = mainInventory.PickUpItem(clickPosition.x, clickPosition.y, true);
+                itemToMove = mainInventory.PickUpItem(clickPosition.x, clickPosition.y);
                 itemToMove.itemData.width = 1;
                 itemToMove.itemData.height = 1;
-                itemToMove.Set(itemToMove.itemData);
+                itemToMove.Set(itemToMove.itemData, itemToMove.count);
 
                 placed = activeItems.FindPlaceToPutActiveItems(itemToMove);
                 if (!placed)
                 {
                     itemToMove.itemData.width = itemToMove.itemData.actualWidth;
                     itemToMove.itemData.height = itemToMove.itemData.actualHeight;
-                    itemToMove.Set(itemToMove.itemData);
+                    itemToMove.Set(itemToMove.itemData, itemToMove.count);
                     placed = mainInventory.FindPlaceToPut(itemToMove);
                 }
             }
             else if (inventory.gameObject.name == "Loot Inventory")
             {
-                itemToMove = otherInventory.PickUpItem(clickPosition.x, clickPosition.y, true);
+                itemToMove = otherInventory.PickUpItem(clickPosition.x, clickPosition.y);
                 placed = mainInventory.FindPlaceToPut(itemToMove);
                 if (!placed)
                 {
@@ -148,11 +148,11 @@ public class InventoryController : MonoBehaviour
             }
             else if (inventory.gameObject.name == "Active Items")
             {
-                itemToMove = activeItems.PickUpItem(clickPosition.x, clickPosition.y, true);
+                itemToMove = activeItems.PickUpItem(clickPosition.x, clickPosition.y);
 
                 itemToMove.itemData.width = itemToMove.itemData.actualWidth;
                 itemToMove.itemData.height = itemToMove.itemData.actualHeight;
-                itemToMove.Set(itemToMove.itemData);
+                itemToMove.Set(itemToMove.itemData, itemToMove.count);
 
                 placed = mainInventory.FindPlaceToPut(itemToMove);
                 if (!placed)
@@ -270,12 +270,12 @@ public class InventoryController : MonoBehaviour
             {
                 selectedItem.itemData.width = 1;
                 selectedItem.itemData.height = 1;
-                selectedItem.Set(selectedItem.itemData);
+                selectedItem.Set(selectedItem.itemData, selectedItem.count);
                 
             } else {
                 selectedItem.itemData.width = selectedItem.itemData.actualWidth;
                 selectedItem.itemData.height = selectedItem.itemData.actualHeight;
-                selectedItem.Set(selectedItem.itemData);
+                selectedItem.Set(selectedItem.itemData, selectedItem.count);
             }
             rectTransform.position = new Vector3(Input.mousePosition.x - selectedItem.itemData.width*32/2, Input.mousePosition.y + selectedItem.itemData.height*32/2, Input.mousePosition.z);
         }

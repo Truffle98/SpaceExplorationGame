@@ -24,10 +24,7 @@ public class Loot : MonoBehaviour
             inventoryItem = Instantiate(loot.item).GetComponent<InventoryItem>();
             item.width = item.actualWidth;
             item.height = item.actualHeight;
-            if (IsStackable(item)) {
-                
-            }
-            inventoryItem.Set(item);
+            inventoryItem.Set(item, 1);
             FindPlaceToPut(inventoryItem);
         }
     }

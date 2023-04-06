@@ -14,11 +14,9 @@ public class InventoryItem : MonoBehaviour
     public int count = 0;
     public TMP_Text countText;
 
-    public void Set(ItemData itemData)
+    public void Set(ItemData itemData, int count)
     {
-        if (count == 0) {
-            this.count = 1;
-        }
+        this.count = count;
         this.itemData = itemData;
 
         GetComponent<Image>().sprite = itemData.itemIcon;
@@ -40,7 +38,9 @@ public class InventoryItem : MonoBehaviour
     }
 
     public void ExecuteAction() {
-        itemData.ExecuteAction();
+        if (itemData.itemName == "Adrenaline Syringe") {
+            IncreaseSpeed();
+        }
     }
 
     public void IncreaseCount(int increment)
@@ -65,5 +65,23 @@ public class InventoryItem : MonoBehaviour
             TMP_Text text = gameObject.transform.GetChild(0).gameObject.GetComponent<TMP_Text>();
             text.text = this.count.ToString();
         }
+    }
+
+    public void UseItem() {
+        if (count > 1) {
+            DecreaseCount();
+            return;
+        }
+        
+        grid.GetComponent<ItemGrid>().PickUpItem(onGridPositionX, onGridPositionY, false, ref grid.GetComponent<ItemGrid>().overlapItemFake);
+        grid.GetComponent<ItemGrid>().overlapItemFake = null;
+        Destroy(gameObject);
+    }
+
+    private void IncreaseSpeed()
+    {
+        PlayerScript player = GameObject.Find("Player").GetComponent<PlayerScript>();
+        player.Sprint(10, player.speed * 2.5f);
+        UseItem();
     }
 }

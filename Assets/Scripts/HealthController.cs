@@ -58,8 +58,7 @@ public class HealthController : MonoBehaviour
                 }
             }
             if (usedSyringe) {
-                inventory.PickUpItem(syringe.onGridPositionX, syringe.onGridPositionY, false);
-                Destroy(syringe.gameObject);
+                syringe.UseItem();
                 usedSyringe = false;
             }
         }

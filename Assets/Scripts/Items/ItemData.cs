@@ -13,9 +13,5 @@ public class ItemData : ScriptableObject
     public string itemName;
     public Sprite itemIcon;
     public bool isActivateable;
-
-    public void ExecuteAction()
-    {
-        throw new NotImplementedException();
-    }
+    
 }

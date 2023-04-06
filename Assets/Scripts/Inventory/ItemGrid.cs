@@ -15,7 +15,8 @@ public class ItemGrid : MonoBehaviour
     [HideInInspector]
     public InventoryItem[,] inventoryItems;
     public int width = 15, height = 10;
-    private InventoryItem overlapItemFake;
+    [HideInInspector]
+    public InventoryItem overlapItemFake;
     [HideInInspector]
     public List<InventoryItem> actualItems;
 
@@ -105,7 +106,7 @@ public class ItemGrid : MonoBehaviour
             }
         } else {
             InventoryItem newItem = Instantiate(inventoryItem);
-            newItem.Set(newItem.itemData);
+            newItem.Set(newItem.itemData, 1);
             Destroy(newItem.gameObject.transform.GetChild(0).gameObject);
             PlaceItem(newItem, xPos, yPos, clickX, clickY, ref overlapItemFake);
             return true;
@@ -146,7 +147,7 @@ public class ItemGrid : MonoBehaviour
         return true;
     }
 
-    public InventoryItem PickUpItem(int xPos, int yPos, bool isAll)
+    public InventoryItem PickUpItem(int xPos, int yPos)
     {
         if (xPos < 0 || yPos < 0) { return null; }
         
@@ -174,7 +175,7 @@ public class ItemGrid : MonoBehaviour
         } else if (!heldItem) {
             item.DecreaseCount();
             item = Instantiate(item);
-            item.Set(item.itemData);
+            item.Set(item.itemData, 1);
             Destroy(item.gameObject.transform.GetChild(0).gameObject);
         } else if (item.itemData.itemName == heldItem.itemData.itemName) {
             item.DecreaseCount();
