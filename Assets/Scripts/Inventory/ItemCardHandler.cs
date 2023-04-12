@@ -65,5 +65,8 @@ public class ItemCardHandler : MonoBehaviour
 
         text = card.transform.GetChild(0).GetChild(1).gameObject.GetComponent<TMP_Text>();
         text.text = "Height: " + targetItem.itemData.height;
+
+        text = card.transform.GetChild(1).GetChild(0).gameObject.GetComponent<TMP_Text>();
+        text.text = targetItem.itemData.itemName;
     }
 }

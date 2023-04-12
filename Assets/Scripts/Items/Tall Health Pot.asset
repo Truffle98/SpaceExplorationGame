@@ -18,3 +18,4 @@ MonoBehaviour:
   actualHeight: 3
   itemName: Tall Health Pot
   itemIcon: {fileID: 21300000, guid: 5fd00bc61626aee4da534fbe7abcde78, type: 3}
+  isActivateable: 0

@@ -15,7 +15,8 @@ public class ItemGrid : MonoBehaviour
     [HideInInspector]
     public InventoryItem[,] inventoryItems;
     public int width = 15, height = 10;
-    private InventoryItem overlapItemFake;
+    [HideInInspector]
+    public InventoryItem overlapItemFake;
     [HideInInspector]
     public List<InventoryItem> actualItems;
 
@@ -53,7 +54,15 @@ public class ItemGrid : MonoBehaviour
             return false;
         }
 
-        if (overlapItem) { ClearItem(overlapItem); }
+        if (overlapItem) {
+            if (overlapItem.itemData.itemName == inventoryItem.itemData.itemName) {
+                overlapItem.IncreaseCount(inventoryItem.count);
+                overlapItem = null;
+                Destroy(inventoryItem.gameObject);
+                return true;
+            }
+            ClearItem(overlapItem); 
+        }
 
         RectTransform rectTransform = inventoryItem.GetComponent<RectTransform>();
         rectTransform.SetParent(this.rectTransform);
@@ -77,9 +86,31 @@ public class ItemGrid : MonoBehaviour
         if (!actualItems.Contains(inventoryItem))
         {
             actualItems.Add(inventoryItem);
+            inventoryItem.grid = gameObject;
         }
-        inventoryItem.grid = gameObject;
         return true;
+    }
+
+    public bool StackItem(InventoryItem inventoryItem, int xPos, int yPos, int clickX, int clickY)
+    {
+        RectTransform rectTransform = inventoryItem.GetComponent<RectTransform>();
+        rectTransform.SetParent(this.rectTransform);
+
+        InventoryItem item = ItemAt(xPos, yPos);
+        if (item) {
+            if (item.itemData.itemName == inventoryItem.itemData.itemName) {
+                item.IncreaseCount(1);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            InventoryItem newItem = Instantiate(inventoryItem);
+            newItem.Set(newItem.itemData, 1);
+            Destroy(newItem.gameObject.transform.GetChild(0).gameObject);
+            PlaceItem(newItem, xPos, yPos, clickX, clickY, ref overlapItemFake);
+            return true;
+        }
     }
 
     public bool PlaceActiveItem(InventoryItem inventoryItem, int xPos, int yPos, int clickX, int clickY, ref InventoryItem overlapItem)
@@ -126,6 +157,38 @@ public class ItemGrid : MonoBehaviour
 
         ClearItem(item);
         actualItems.Remove(item);
+
+        return item;
+    }
+
+    public InventoryItem PickUpItem(int xPos, int yPos, bool isAll, ref InventoryItem heldItem) // something is wrong with the ref. probably turning null and fucking everything up
+    {
+        if (xPos < 0 || yPos < 0) { return null; }
+        
+        InventoryItem item = inventoryItems[xPos, yPos];
+
+        if (!item) { return null; }
+
+        if (isAll || (item.count == 1 && !heldItem)) {
+            ClearItem(item);
+            actualItems.Remove(item);
+        } else if (!heldItem) {
+            item.DecreaseCount();
+            item = Instantiate(item);
+            item.Set(item.itemData, 1);
+            Destroy(item.gameObject.transform.GetChild(0).gameObject);
+        } else if (item.itemData.itemName == heldItem.itemData.itemName) {
+            item.DecreaseCount();
+            if (item.count == 0) {
+                ClearItem(item);
+                actualItems.Remove(item);
+                Destroy(item.gameObject);
+            }
+            heldItem.IncreaseCount(1);
+            return heldItem;
+        } else {
+            return heldItem;
+        }
 
         return item;
     }
@@ -228,9 +291,16 @@ public class ItemGrid : MonoBehaviour
         {
             for (int y = 0; y < this.height; y++)
             {
-                if (IsSpace(x, y, 1, 1))
+                if (IsSpace(x, y, 1, 1) && itemToMove.itemData.isActivateable)
                 {
+                    // if (itemToMove.count > 1) {
+                    //     itemToMove.DecreaseCount();
+                    //     InventoryItem item = Instantiate(itemToMove);
+                    //     Destroy(item.gameObject.transform.GetChild(0).gameObject);
+                    //     PlaceActiveItem(item, x, y, x, y, ref overlapItemFake);
+                    // } else {
                     PlaceActiveItem(itemToMove, x, y, x, y, ref overlapItemFake);
+                    // }
                     return true;
                 }
             }

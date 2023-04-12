@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class InventoryController : MonoBehaviour
 {
-    [HideInInspector]
+    // [HideInInspector]
     public ItemGrid inventory, otherInventory, activeItems;
     public ItemGrid mainInventory;
     [HideInInspector]
@@ -15,10 +17,17 @@ public class InventoryController : MonoBehaviour
     public InventoryHighlight inventoryHighlight;
     public ItemCardHandler itemCard;
     public GameObject inventoryHandler;
+    public TMP_Text helperText;
+
+    void Start()
+    {
+        helperText.CrossFadeAlpha(0.0f, 0.0f, false);
+    }
 
     void Update()
     {
         DragItemIcon();
+        CheckActiveItemInputs();
 
         if (inventory == null)
         {
@@ -32,13 +41,82 @@ public class InventoryController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             LeftMouseButtonPress();
-        } else if (Input.GetMouseButtonDown(1))
+        }
+        else if (Input.GetMouseButtonDown(1))
         {
             RightMouseButtonPress();
         }
     }
 
+    private void CheckActiveItemInputs()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            if (activeItems.inventoryItems[0, 0] != null)
+            {
+                activeItems.inventoryItems[0, 0].ExecuteAction();
+            }
+            else
+            {
+                helperText.text = "No item in active item slot 1";
+                helperText.CrossFadeAlpha(1f, 0f, false);
+                helperText.CrossFadeAlpha(0.0f, 1f, false);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if (activeItems.inventoryItems[0, 1] != null)
+            {
+                activeItems.inventoryItems[0, 1].ExecuteAction();
+            }
+            else
+            {
+                helperText.text = "No item in active item slot 2";
+                helperText.CrossFadeAlpha(1f, 0f, false);
+                helperText.CrossFadeAlpha(0.0f, 1f, false);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            if (activeItems.inventoryItems[0, 2] != null)
+            {
+                activeItems.inventoryItems[0, 2].ExecuteAction();
+            }
+            else
+            {
+                helperText.text = "No item in active item slot 3";
+                helperText.CrossFadeAlpha(1f, 0f, false);
+                helperText.CrossFadeAlpha(0.0f, 1f, false);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            if (activeItems.inventoryItems[0, 3] != null)
+            {
+                activeItems.inventoryItems[0, 3].ExecuteAction();
+            }
+            else
+            {
+                helperText.text = "No item in active item slot 4";
+                helperText.CrossFadeAlpha(1f, 0f, false);
+                helperText.CrossFadeAlpha(0.0f, 1f, false);
+            }
+        }
+    }
+
     private void RightMouseButtonPress()
+    {
+        Vector2Int clickPosition = inventory.GetTilePosition(Input.mousePosition);
+        Vector2Int placePosition = GetTiledGridPosition();
+        if (selectedItem == null || (selectedItem && inventory.ItemAt(placePosition.x, placePosition.y) && inventory.ItemAt(placePosition.x, placePosition.y).itemData.itemName == selectedItem.itemData.itemName))
+        {
+            PickUpItem(placePosition, false);
+        } else {
+            PlaceItem(placePosition, clickPosition);
+        }
+    }
+
+    private void AutoPlaceItem()
     {
         Vector2Int clickPosition = GetTiledGridPosition();
         if (inventory.ItemAt(clickPosition.x, clickPosition.y) != null)
@@ -46,14 +124,16 @@ public class InventoryController : MonoBehaviour
             if (inventory.gameObject.name == "Inventory")
             {
                 itemToMove = mainInventory.PickUpItem(clickPosition.x, clickPosition.y);
-
                 itemToMove.itemData.width = 1;
                 itemToMove.itemData.height = 1;
-                itemToMove.Set(itemToMove.itemData);
+                itemToMove.Set(itemToMove.itemData, itemToMove.count);
 
                 placed = activeItems.FindPlaceToPutActiveItems(itemToMove);
                 if (!placed)
                 {
+                    itemToMove.itemData.width = itemToMove.itemData.actualWidth;
+                    itemToMove.itemData.height = itemToMove.itemData.actualHeight;
+                    itemToMove.Set(itemToMove.itemData, itemToMove.count);
                     placed = mainInventory.FindPlaceToPut(itemToMove);
                 }
             }
@@ -72,7 +152,7 @@ public class InventoryController : MonoBehaviour
 
                 itemToMove.itemData.width = itemToMove.itemData.actualWidth;
                 itemToMove.itemData.height = itemToMove.itemData.actualHeight;
-                itemToMove.Set(itemToMove.itemData);
+                itemToMove.Set(itemToMove.itemData, itemToMove.count);
 
                 placed = mainInventory.FindPlaceToPut(itemToMove);
                 if (!placed)
@@ -124,7 +204,11 @@ public class InventoryController : MonoBehaviour
         Vector2Int placePosition = GetTiledGridPosition();
         if (selectedItem == null)
         {
-            PickUpItem(placePosition);
+            if (Input.GetKey(KeyCode.LeftShift)) {
+                AutoPlaceItem();
+            } else {
+                PickUpItem(placePosition, true);
+            }
         }
         else
         {
@@ -159,9 +243,19 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    private void PickUpItem(Vector2Int position)
+    private void PlaceOneItem(Vector2Int placePosition, Vector2Int clickPosition) {
+        bool stacked = inventory.StackItem(selectedItem, placePosition.x, placePosition.y, clickPosition.x, clickPosition.y);
+        if (stacked) {
+            selectedItem.DecreaseCount();
+            if (selectedItem.count == 0) {
+                Destroy(selectedItem.gameObject);
+            }
+        }
+    }
+
+    private void PickUpItem(Vector2Int position, bool all)
     {
-        selectedItem = inventory.PickUpItem(position.x, position.y);
+        selectedItem = inventory.PickUpItem(position.x, position.y, all, ref selectedItem);
         if (selectedItem)
         {
             rectTransform = selectedItem.GetComponent<RectTransform>();
@@ -176,12 +270,12 @@ public class InventoryController : MonoBehaviour
             {
                 selectedItem.itemData.width = 1;
                 selectedItem.itemData.height = 1;
-                selectedItem.Set(selectedItem.itemData);
+                selectedItem.Set(selectedItem.itemData, selectedItem.count);
                 
             } else {
                 selectedItem.itemData.width = selectedItem.itemData.actualWidth;
                 selectedItem.itemData.height = selectedItem.itemData.actualHeight;
-                selectedItem.Set(selectedItem.itemData);
+                selectedItem.Set(selectedItem.itemData, selectedItem.count);
             }
             rectTransform.position = new Vector3(Input.mousePosition.x - selectedItem.itemData.width*32/2, Input.mousePosition.y + selectedItem.itemData.height*32/2, Input.mousePosition.z);
         }

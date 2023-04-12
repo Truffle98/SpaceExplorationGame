@@ -16,5 +16,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3d9175e555a5fd541b4a8f72872a674d, type: 2}
   - {fileID: 11400000, guid: 3d9175e555a5fd541b4a8f72872a674d, type: 2}
   - {fileID: 11400000, guid: d9c5a0929074586498fb595c42866563, type: 2}
+  - {fileID: 11400000, guid: 5fb93a8a26ff80f4799f1848db47c652, type: 2}
+  - {fileID: 11400000, guid: fc9e2cbf8082b8540863e3d8301ec19d, type: 2}
+  - {fileID: 11400000, guid: 5532223a286889946b46a2a469b7b3b1, type: 2}
+  - {fileID: 11400000, guid: 5532223a286889946b46a2a469b7b3b1, type: 2}
+  - {fileID: 11400000, guid: 5532223a286889946b46a2a469b7b3b1, type: 2}
+  - {fileID: 11400000, guid: 5532223a286889946b46a2a469b7b3b1, type: 2}
+  - {fileID: 11400000, guid: 5532223a286889946b46a2a469b7b3b1, type: 2}
+  - {fileID: 11400000, guid: 5fb93a8a26ff80f4799f1848db47c652, type: 2}
+  - {fileID: 11400000, guid: 5fb93a8a26ff80f4799f1848db47c652, type: 2}
   item: {fileID: 4468276617170953323, guid: d421fb77205c9ee48a48f649daa8edc1, type: 3}
   lootGrid: {fileID: 0}

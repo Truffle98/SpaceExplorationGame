@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,11 +6,12 @@ using UnityEngine;
 public class PlayerScript : MonoBehaviour
 {
     public Camera cam;
-    public float speed, angle, maxCooldown = 500;
-    private float playerRotation = Mathf.PI / 2f, sprintTime, baseSpeed, sprintingSpeed, cooldownTime;
+    public float speed, angle, maxCooldown = 750;
+    private float playerRotation = Mathf.PI / 2f, sprintTime, baseSpeed, sprintingSpeed, cooldownTime, adrenalineSpeed, adrenalineTime;
     private Rigidbody2D body;
     private List<GameObject> newVisible = new List<GameObject>(), oldVisible = new List<GameObject>(), 
     inVision = new List<GameObject>(), oldInVision = new List<GameObject>();
+    private bool hasAdrenaline;
     public FOVScript[] fovs;
 
     void Start()
@@ -23,6 +25,32 @@ public class PlayerScript : MonoBehaviour
 
     void Update()
     {
+        if (!hasAdrenaline) {
+            if (Input.GetKey(KeyCode.LeftShift) && sprintTime < 500 && cooldownTime == 0)
+            {
+                if (speed < sprintingSpeed) { speed++; }
+                // speed = sprintingSpeed;
+                sprintTime++;
+                if (sprintTime>499)
+                {
+                    cooldownTime = maxCooldown;
+                }
+            } else {
+                speed = baseSpeed;
+                sprintTime = 0;
+                if (cooldownTime > 0)
+                {
+                    cooldownTime--;
+                }
+            }
+        } else {
+            speed = adrenalineSpeed;
+            sprintTime += Time.deltaTime;
+            if (sprintTime > adrenalineTime) {
+                speed = baseSpeed;
+                hasAdrenaline = false;
+            }
+        }
         TurnPlayer();
         RaycastVision();
         MovePlayer();
@@ -266,4 +294,10 @@ public class PlayerScript : MonoBehaviour
         oldInVision.Clear();
     }
 
+    public void Sprint(int time, float speed)
+    {
+        hasAdrenaline = true;
+        adrenalineSpeed = speed;
+        adrenalineTime = time;
+    }
 }

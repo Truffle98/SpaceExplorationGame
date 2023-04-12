@@ -8,12 +8,14 @@ public class HealthController : MonoBehaviour
 {
     public float health, dHealth, realHealth;
     public float scaleFactor;
-    public bool healing, damaging;
+    private bool healing, damaging, usedSyringe;
+    private InventoryItem syringe;
     public Image damageOverlay;
+    public ItemGrid inventory;
 
     void Start()
     {
-        health = 100;        
+        health = 100;
     }
 
     void Update()
@@ -47,7 +49,18 @@ public class HealthController : MonoBehaviour
         {
             ChangeHealth(-10);
         } else if (Input.GetKeyDown(KeyCode.H)) {
-            ChangeHealth(10);
+            foreach (InventoryItem item in inventory.actualItems) {
+                if (item.itemData.itemName == "Health Syringe" && this.health < 100f) {
+                    ChangeHealth(20);
+                    usedSyringe = true;
+                    syringe = item;
+                    break;
+                }
+            }
+            if (usedSyringe) {
+                syringe.UseItem();
+                usedSyringe = false;
+            }
         }
     }
 
